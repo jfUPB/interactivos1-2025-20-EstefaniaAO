@@ -181,7 +181,9 @@ while True:
 ``` js
 let port;
 let connectBtn;
-let x= 200
+let x = 200;
+let connectionInitialized = false;
+
 function setup() {
   createCanvas(400, 400);
 
@@ -189,38 +191,44 @@ function setup() {
   connectBtn = createButton('Connect to micro:bit');
   connectBtn.position(80, 300);
   connectBtn.mousePressed(connectBtnClick);
-    circle(x,200, 50)
 }
 
 function draw() {
   background(220);
 
+  // Lógica de conexión inicial
+  if (port.opened() && !connectionInitialized) {
+    port.clear();
+    connectionInitialized = true;
+  }
 
-      if(port.availableBytes() > 0){
-        let dataRx = port.read(1);
-        if(dataRx == 'I' && x>25) {
-        fill("blue")
-        x-=5
-        }
-        else if(dataRx == 'D' && x<375){
-        fill("red")
-          x+=5
-        }}
-      if (!port.opened()) {
-        connectBtn.html('Connect to micro:bit');
+  if (port.availableBytes() > 0) {
+    let dataRx = port.read(1);
+    if (dataRx == 'I' && x > 25) {
+      fill("blue");
+      x -= 5;
+    } else if (dataRx == 'D' && x < 375) {
+      fill("red");
+      x += 5;
     }
-    else {
-        connectBtn.html('Disconnect');
-    }
-    circle(x,200, 50)
+  }
+
+  if (!port.opened()) {
+    connectBtn.html('Connect to micro:bit');
+  } else {
+    connectBtn.html('Disconnect');
+  }
+
+  circle(x, 200, 50);
 }
 
 function connectBtnClick() {
-    if (!port.opened()) {
-        port.open('MicroPython', 115200);
-    } else {
-        port.close();
-    }
+  if (!port.opened()) {
+    port.open('MicroPython', 115200);
+    connectionInitialized = false;
+  } else {
+    port.close();
+  }
 }
 ``` 
 
