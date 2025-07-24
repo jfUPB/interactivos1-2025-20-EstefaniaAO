@@ -237,9 +237,9 @@ function connectBtnClick() {
 ```
 
 #### Enlaces:
+[Pantalla completa](https://editor.p5js.org/estefaao2006/full/yDYeXxX7y)
 
-https://editor.p5js.org/estefaao2006/full/yDYeXxX7y
+[Editable](https://editor.p5js.org/estefaao2006/sketches/yDYeXxX7y)
 
-https://editor.p5js.org/estefaao2006/full/yDYeXxX7y
 
 
