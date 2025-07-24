@@ -160,6 +160,9 @@ function connectBtnClick() {
 
 ### Actividad 06
 ---
+
+
+#### Código del microbit:
 ``` py
 from microbit import *
 
@@ -178,6 +181,8 @@ while True:
     sleep(20)
 
 ```
+
+#### Código de p5.js:
 ``` js
 let port;
 let connectBtn;
@@ -229,6 +234,12 @@ function connectBtnClick() {
     port.close();
   }
 }
-``` 
+```
+
+#### Enlaces:
+
+https://editor.p5js.org/estefaao2006/full/yDYeXxX7y
+
+https://editor.p5js.org/estefaao2006/full/yDYeXxX7y
 
 
