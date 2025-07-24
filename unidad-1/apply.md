@@ -196,7 +196,6 @@ function setup() {
 function draw() {
   background(220);
 
-  // Lógica de conexión inicial
   if (port.opened() && !connectionInitialized) {
     port.clear();
     connectionInitialized = true;
