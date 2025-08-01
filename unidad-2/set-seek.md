@@ -92,6 +92,73 @@ El semáforo empieza en rojo, luego pasa a verde, después a amarillo, y vuelve 
 
 <img width="838" height="1022" alt="image" src="https://github.com/user-attachments/assets/14d51a8a-7bf4-4143-9447-cfdb1bd57e35" />
 
+```python
+from microbit import *
+import utime
+
+STATE_INIT = 0
+STATE_HAPPY = 1
+STATE_SMILE = 2
+STATE_SAD = 3
+
+HAPPY_INTERVAL = 1500
+SMILE_INTERVAL = 1000
+SAD_INTERVAL = 2000
+
+
+currentState= STATE_INIT
+startTime=0
+interval=0
+
+def tarea1():
+    global currentState
+    global startTime
+    global interval
+    
+    if currentState == STATE_INIT:
+        display.show(Image.HAPPY)
+        startTime = utime.ticks_ms()
+        interval = HAPPY_INTERVAL
+        currentState= STATE_HAPPY
+    elif currentState == STATE_HAPPY:
+       if utime.ticks_diff(utime.ticks_ms(), startTime) > interval:
+            display.show(Image.SMILE)
+            startTime= utime.ticks_ms()
+            interval = SMILE_INTERVAL
+            currentState= STATE_SMILE
+       if button_a.was_pressed():
+           display.show(Image.SAD)
+           interval = SAD_INTERVAL
+           startTime= utime.ticks_ms()
+           currentState= STATE_SAD
+    elif currentState == STATE_SMILE:
+        if utime.ticks_diff(utime.ticks_ms(), startTime) > interval:
+            display.show(Image.SAD)
+            interval = SAD_INTERVAL
+            startTime= utime.ticks_ms()
+            currentState= STATE_SAD
+        if button_a.was_pressed():
+           display.show(Image.HAPPY)
+           interval = HAPPY_INTERVAL
+           startTime= utime.ticks_ms()
+           currentState= STATE_HAPPY
+    elif currentState == STATE_SAD:
+        if utime.ticks_diff(utime.ticks_ms(), startTime) > interval:
+            display.show(Image.HAPPY)
+            interval = HAPPY_INTERVAL
+            startTime= utime.ticks_ms()
+            currentState= STATE_HAPPY
+        if button_a.was_pressed():
+            display.show(Image.SMILE)
+            interval = SMILE_INTERVAL
+            startTime= utime.ticks_ms()
+            currentState= STATE_SMILE
+    else:
+        display.show(Image.RABBIT)
+
+while True:
+    tarea1()
+```
 
 #### ¿Por qué este programa permite realizar varias tareas de forma concurrente?
 Este programa usa una máquina de estados que revisa constantemente dos cosas: el paso del tiempo y si se ha presionado un botón. Gracias a esto, puede mostrar una secuencia de imágenes (feliz, sonriente y triste) con sus tiempos específicos, mientras también responde de inmediato si el botón A se presiona. Por eso se dice que atiende múltiples eventos a la vez, sin que uno bloquee al otro.
@@ -122,3 +189,4 @@ Este programa usa una máquina de estados que revisa constantemente dos cosas: e
 - _Evento:_ Se presiona el botón A.
 - _Resultado esperado:_ Cambia a cara triste (STATE_SAD).
 - _Resultado real:_  Si asa. Cambia a STATE_SAD.
+
