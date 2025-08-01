@@ -96,7 +96,8 @@ El semáforo empieza en rojo, luego pasa a verde, después a amarillo, y vuelve 
 #### ¿Por qué este programa permite realizar varias tareas de forma concurrente?
 Este programa usa una máquina de estados que revisa constantemente dos cosas: el paso del tiempo y si se ha presionado un botón. Gracias a esto, puede mostrar una secuencia de imágenes (feliz, sonriente y triste) con sus tiempos específicos, mientras también responde de inmediato si el botón A se presiona. Por eso se dice que atiende múltiples eventos a la vez, sin que uno bloquee al otro.
 
-### Estados, eventos y acciones
+
+#### Estados, eventos y acciones
 
 - **STATE_INIT**  
   No pasa nada todavía. Se muestra la cara feliz y se guarda el tiempo actual.
@@ -112,3 +113,12 @@ Este programa usa una máquina de estados que revisa constantemente dos cosas: e
 - **STATE_SAD**  
   - Si presiono el botón A → muestra una cara sonriente y cambia a `STATE_SMILE`.  
   - Si pasan más de 2 segundos → muestra una cara feliz y vuelve a `STATE_HAPPY`.
+
+
+ 
+#### Vector de prueba 1
+
+- _Condición inicial:_ El micro:bit está mostrando la cara feliz (STATE_HAPPY).
+- _Evento:_ Se presiona el botón A.
+- _Resultado esperado:_ Cambia a cara triste (STATE_SAD).
+- _Resultado real:_  Si asa. Cambia a STATE_SAD.
