@@ -184,13 +184,29 @@ Estados:
   - Evento: Si presiono el botón A → Acción: muestra una cara sonriente y cambia a `STATE_SMILE`.  
   - Evento: Si pasan más de 2 segundos → Acción: muestra una cara feliz y vuelve a `STATE_HAPPY`.
 
-
+#### Vectores de prueba
  
 #### Vector de prueba 1
 
-- _Condición inicial:_ El micro:bit está mostrando la cara feliz (STATE_HAPPY).
-- _Evento:_ Se presiona el botón A.
-- _Resultado esperado:_ Cambia a cara triste (STATE_SAD).
-- _Resultado real:_  Si asa. Cambia a STATE_SAD.
+- **Condición inicial:** El micro:bit está mostrando la cara feliz (`STATE_HAPPY`).
+- **Evento:** Se presiona el botón A.
+- **Resultado esperado:** Cambia a cara triste (`STATE_SAD`).
+- **Resultado real:**  Cambia a `STATE_SAD`.
 
+---
 
+#### Vector de prueba 2
+
+- **Condición inicial:** El micro:bit está mostrando la cara feliz (`STATE_HAPPY`), y pasa el tiempo del intervalo sin que se presione ningún botón.
+- **Evento:** Transcurre más de 1500 ms sin interacción.
+- **Resultado esperado:** Cambia a cara sonriente (`STATE_SMILE`).
+- **Resultado real:**  Cambia automáticamente a `STATE_SMILE`.
+
+---
+
+#### Vector de prueba 3
+
+- **Condición inicial:** El micro:bit está mostrando la cara triste (`STATE_SAD`).
+- **Evento:** Se presiona el botón A *antes de que se cumpla el tiempo del intervalo*.
+- **Resultado esperado:** Cambia a cara sonriente (`STATE_SMILE`).
+- **Resultado real:**  Cambia a `STATE_SMILE` inmediatamente.
