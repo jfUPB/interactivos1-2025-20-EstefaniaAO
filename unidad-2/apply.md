@@ -1,7 +1,7 @@
 # Unidad 2
 
-
 ## 🛠 Fase: Apply
+
   ``` py
 from microbit import *
 import utime
@@ -44,3 +44,48 @@ def bomba():
 while True:
     bomba()
   ``` 
+ 
+#### Vector de prueba 1
+
+- **Condición inicial:** El micro:bit está en (`start_STATE`).
+- **Evento:** Se agita el micro:bit.
+- **Resultado esperado:** Cambia a (`armed_STATE`) y empieza el contador.
+- **Resultado real:**  Funciona, cambia a `armed_STATE`.
+
+---
+
+#### Vector de prueba 2
+
+- **Condición inicial:** El micro:bit está en (`start_STATE`).
+- **Evento:** Se presiona el botón A.
+- **Resultado esperado:** Aumenta el tiempo total en un segundo y se muestra el número.
+- **Resultado real:**  Funciona.
+
+---
+
+#### Vector de prueba 3
+
+- **Condición inicial:** El micro:bit está en (`start_STATE`).
+- **Evento:** Se presiona el botón B.
+- **Resultado esperado:** Disminuye el tiempo total en un segundo y se muestra el número.
+- **Resultado real:**  Funciona.
+
+---
+
+#### Vector de prueba 4
+
+- **Condición inicial:** El micro:bit está en (`armed_STATE`).
+- **Evento:** Transcurre el tiempo total de la bomba sin interrupción.
+- **Resultado esperado:** El contador se detiene al llegar a cero, deja de mostrar números y suena el speaker.
+- **Resultado real:**  Funciona.
+
+---
+
+#### Vector de prueba 5
+
+- **Condición inicial:** El micro:bit está en (`armed_STATE`).
+- **Evento:** Se presiona el touch del micro:bit.
+- **Resultado esperado:** Cambia a (`start_STATE`).
+- **Resultado real:**  Funciona. El micro:bit está en (`start_STATE`).
+
+
