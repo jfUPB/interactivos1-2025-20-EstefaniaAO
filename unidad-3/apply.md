@@ -141,6 +141,7 @@ function keyPressed() {
 
 #### Código p5.js:
 
+~~~ py
 from microbit import * 
 import utime 
 import radio
@@ -164,10 +165,13 @@ radioTask = RadioTask()
 while True:
 radioTask.update ()
 
+~~~
+
 #### Enlace al editor de p5.js con tu código:
 
 
 
 #### Código del micro:bit:
+
 
 
