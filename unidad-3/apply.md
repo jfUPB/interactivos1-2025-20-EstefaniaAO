@@ -148,17 +148,22 @@ function setup() {
 }
 
 function draw() {
-  
   if (port.opened() && !connectionInitialized) {
-  port.clear();
-  connectionInitialized = true;
+    port.clear();
+    connectionInitialized = true;
   }
   if (!port.opened()) {
     connectBtn.html("Connect to micro:bit");
   } else {
     connectBtn.html("Disconnect");
   }
-  
+
+  // lectura de datos desde micro:bit
+  let data = port.readUntil("\n");
+  if (data.length > 0) {
+    bombTask.keyInput(data.trim()); 
+  }
+
   background(0);
   fill(255);
   bombTask.update();
@@ -280,3 +285,4 @@ while True:
 ~~~
 
 #### Enlace al editor de p5.js con tu código:
+
