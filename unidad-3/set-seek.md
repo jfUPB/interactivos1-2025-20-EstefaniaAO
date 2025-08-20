@@ -82,3 +82,8 @@ Se puede usar para diferentes instancias. Así como usé el semáforo 1, 2 y 3, 
 #### ¿Puedes ver cómo la técnica de programación con máquinas de estado y el uso de funciona no bloqueantes te permite que varios semáforos funcionen al mismo tiempo?
 
 Si, ya que son fácilmente adaptables y escalables a otras instancias.
+
+
+
+### Actividad 05
+---
