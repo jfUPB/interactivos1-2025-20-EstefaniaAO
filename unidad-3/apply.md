@@ -132,15 +132,33 @@ function keyPressed() {
 
 ~~~ js
 let bombTask;
+let port;
+let connectBtn;
+let connectionInitialized = false;
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(1000, 1000);
+  port = createSerial();
+  connectBtn = createButton("Connect to micro:bit");
+  connectBtn.position(80, 300);
+  connectBtn.mousePressed(connectBtnClick);
   textAlign(CENTER, CENTER);
   textSize(32);
   bombTask = new BombTask();
 }
 
 function draw() {
+  
+  if (port.opened() && !connectionInitialized) {
+  port.clear();
+  connectionInitialized = true;
+  }
+  if (!port.opened()) {
+    connectBtn.html("Connect to micro:bit");
+  } else {
+    connectBtn.html("Disconnect");
+  }
+  
   background(0);
   fill(255);
   bombTask.update();
@@ -231,35 +249,34 @@ class BombTask {
 function keyPressed() {
   bombTask.keyInput(key.toUpperCase());
 }
+
+function connectBtnClick() {
+  if (!port.opened()) {
+    port.open("MicroPython", 115200);
+    connectionInitialized = false;
+  } else {
+    port.close();
+  }
+}
 ~~~
 
 #### Código p5.js:
 
 ~~~ py
 from microbit import * 
-import utime 
-import radio
+uart.init(baudrate=115200)
 
 display.clear ()
 
-class ButtonTask:
-    def __init__(self):
-        radio. config (group=16)
-        radio.on()
-    def update(self):
-        if button_a.was_pressed ():
-            k= ('A')
-        elif button_b.was_pressed ():
-            k= ('B')
-        elif accelerometer.was_gesture ('shake'):
-            k= ('S')
-        elif pin_logo.is_touched ():
-            k= ('T')
-
-buttonTask = ButtonTask()
-
 while True:
-    buttonTask.update ()
+    if button_a.was_pressed ():
+        uart.write('A')
+    elif button_b.was_pressed ():
+        uart.write('B')
+    elif accelerometer.was_gesture ('shake'):
+        uart.write('S')
+    elif pin_logo.is_touched ():
+        uart.write('T')
 
 ~~~
 
@@ -268,6 +285,7 @@ while True:
 
 
 #### Código del micro:bit:
+
 
 
 
