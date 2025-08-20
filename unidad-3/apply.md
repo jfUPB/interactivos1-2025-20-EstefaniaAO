@@ -141,11 +141,33 @@ function keyPressed() {
 
 #### Código p5.js:
 
+from microbit import * 
+import utime 
+import radio
 
+display.clear ()
+
+class RadioTask:
+def __init__(self):
+radio. config (group=16)
+radio.on()
+def update(self):
+if button_a.was_pressed () :
+radio. send ('A')
+elif button_b. was_pressed () :
+radio. send ('B')
+elif accelerometer was_gesture ('shake'):
+radio send ('S')
+elif pin_logo. is_touched () :
+radio. send ('T')
+radioTask = RadioTask()
+while True:
+radioTask.update ()
 
 #### Enlace al editor de p5.js con tu código:
 
 
 
 #### Código del micro:bit:
+
 
