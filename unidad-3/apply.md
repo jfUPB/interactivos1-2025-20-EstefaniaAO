@@ -128,7 +128,7 @@ function keyPressed() {
 
 ---
 
-#### Código fuente:
+#### Código p5.js:
 
 ~~~ js
 let bombTask;
@@ -260,7 +260,7 @@ function connectBtnClick() {
 }
 ~~~
 
-#### Código p5.js:
+#### Código del micro:bit:
 
 ~~~ py
 from microbit import * 
@@ -277,16 +277,6 @@ while True:
         uart.write('S')
     elif pin_logo.is_touched ():
         uart.write('T')
-
 ~~~
 
 #### Enlace al editor de p5.js con tu código:
-
-
-
-#### Código del micro:bit:
-
-
-
-
-
