@@ -45,10 +45,8 @@ class BombTask {
 
   update() {
     if (this.state === 'CONFIG') {
-      // Estado de configuración: ajustar tiempo
     } 
     else if (this.state === 'ARMED') {
-      // Contador de tiempo
       if (millis() - this.startTime > 1000) {
         this.startTime = millis();
         this.count--;
@@ -57,15 +55,12 @@ class BombTask {
         }
       }
     } 
-    else if (this.state === 'EXPLODED') {
-      // Espera reinicio
-    }
   }
 
   display() {
     if (this.state === 'CONFIG') {
       text("Config: " + this.count, width/2, height/2);
-      text("Aumenta: A | Disminuye: B | Armar: ESPACIO", width/2, height/2 + 40);
+      text("Aumenta: A | Disminuye: B | Armar: S", width/2, height/2 + 40);
     } 
     else if (this.state === 'ARMED') {
       text("Tiempo: " + this.count, width/2, height/2);
@@ -73,7 +68,7 @@ class BombTask {
     } 
     else if (this.state === 'EXPLODED') {
       text("BOOM!", width/2, height/2);
-      text("Reinicia tocando: R", width/2, height/2 + 40);
+      text("Reinicia tocando: T", width/2, height/2 + 40);
     }
   }
 
@@ -81,7 +76,7 @@ class BombTask {
     if (this.state === 'CONFIG') {
       if (k === 'A') this.count = min(this.count + 1, 60);
       if (k === 'B') this.count = max(10, this.count - 1);
-      if (k === ' ') {  // ESPACIO para armar
+      if (k === 'S') {
         this.startTime = millis();
         this.state = 'ARMED';
       }
@@ -110,7 +105,7 @@ class BombTask {
       }
     } 
     else if (this.state === 'EXPLODED') {
-      if (k === 'R') { // Reinicio
+      if (k === 'T') {
         this.count = 20;
         this.startTime = millis();
         this.state = 'CONFIG';
@@ -136,7 +131,106 @@ function keyPressed() {
 #### Código fuente:
 
 ~~~ js
+let bombTask;
 
+function setup() {
+  createCanvas(400, 400);
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  bombTask = new BombTask();
+}
+
+function draw() {
+  background(0);
+  fill(255);
+  bombTask.update();
+  bombTask.display();
+}
+
+class BombTask {
+  constructor() {
+    this.PASSWORD = ['A', 'B', 'A'];
+    this.key = new Array(this.PASSWORD.length).fill('');
+    this.keyindex = 0;
+    this.count = 20;
+    this.startTime = millis();
+    this.state = 'CONFIG';
+  }
+
+  update() {
+    if (this.state === 'CONFIG') {
+    } 
+    else if (this.state === 'ARMED') {
+      if (millis() - this.startTime > 1000) {
+        this.startTime = millis();
+        this.count--;
+        if (this.count <= 0) {
+          this.state = 'EXPLODED';
+        }
+      }
+    } 
+  }
+
+  display() {
+    if (this.state === 'CONFIG') {
+      text("Config: " + this.count, width/2, height/2);
+      text("Aumenta: A | Disminuye: B | Armar: S", width/2, height/2 + 40);
+    } 
+    else if (this.state === 'ARMED') {
+      text("Tiempo: " + this.count, width/2, height/2);
+      text("Introduce clave: A/B", width/2, height/2 + 40);
+    } 
+    else if (this.state === 'EXPLODED') {
+      text("BOOM!", width/2, height/2);
+      text("Reinicia tocando: T", width/2, height/2 + 40);
+    }
+  }
+
+  keyInput(k) {
+    if (this.state === 'CONFIG') {
+      if (k === 'A') this.count = min(this.count + 1, 60);
+      if (k === 'B') this.count = max(10, this.count - 1);
+      if (k === 'S') {
+        this.startTime = millis();
+        this.state = 'ARMED';
+      }
+    } 
+    else if (this.state === 'ARMED') {
+      if (k === 'A' || k === 'B') {
+        this.key[this.keyindex] = k;
+        this.keyindex++;
+
+        if (this.keyindex === this.PASSWORD.length) {
+          let passIsOK = true;
+          for (let i = 0; i < this.key.length; i++) {
+            if (this.key[i] !== this.PASSWORD[i]) {
+              passIsOK = false;
+              break;
+            }
+          }
+          if (passIsOK) {
+            this.count = 20;
+            this.keyindex = 0;
+            this.state = 'CONFIG';
+          } else {
+            this.keyindex = 0;
+          }
+        }
+      }
+    } 
+    else if (this.state === 'EXPLODED') {
+      if (k === 'T') {
+        this.count = 20;
+        this.startTime = millis();
+        this.state = 'CONFIG';
+      }
+    }
+  }
+}
+
+function keyPressed() {
+  bombTask.keyInput(key.toUpperCase());
+}
 ~~~
 
 #### Código p5.js:
@@ -148,22 +242,24 @@ import radio
 
 display.clear ()
 
-class RadioTask:
-def __init__(self):
-radio. config (group=16)
-radio.on()
-def update(self):
-if button_a.was_pressed () :
-radio. send ('A')
-elif button_b. was_pressed () :
-radio. send ('B')
-elif accelerometer was_gesture ('shake'):
-radio send ('S')
-elif pin_logo. is_touched () :
-radio. send ('T')
-radioTask = RadioTask()
+class ButtonTask:
+    def __init__(self):
+        radio. config (group=16)
+        radio.on()
+    def update(self):
+        if button_a.was_pressed ():
+            k= ('A')
+        elif button_b.was_pressed ():
+            k= ('B')
+        elif accelerometer.was_gesture ('shake'):
+            k= ('S')
+        elif pin_logo.is_touched ():
+            k= ('T')
+
+buttonTask = ButtonTask()
+
 while True:
-radioTask.update ()
+    buttonTask.update ()
 
 ~~~
 
@@ -172,6 +268,7 @@ radioTask.update ()
 
 
 #### Código del micro:bit:
+
 
 
 
