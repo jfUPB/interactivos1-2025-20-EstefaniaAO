@@ -7,11 +7,11 @@
 
 #### Describe con tus palabras qué es una máquina de estados. ¿Cuáles son sus cuatro componentes fundamentales que has utilizado en esta unidad?
 
-
+Una máquina de estados es una tecnica para poder manejar un sistema con distintos estados y mira diferentes eventos y su funcionamiento en el programa. El concepto de máquina de estados, los vectores de prueba, los arreglos y los eventos.
 
 #### Explica por qué la técnica de máquina de estados es tan útil para gestionar la “concurrencia” (atender varios eventos y tareas “al mismo tiempo”) en un dispositivo con un solo hilo de ejecución como el micro:bit o en p5.js. ¿Qué problema soluciona en comparación con usar funciones como sleep()?
 
-
+Que como tienen un solo hilo de ejecución pero hay que mirar distintas acciones en simultaneo entonces al usar sleep se bloquea el programa entero entonces no se puede seguir analizando nada más. 
 
 #### Imagina que tienes que añadir una nueva funcionalidad a la bomba: si se recibe un evento especial (por ejemplo, una combinación de botones o un comando serial) mientras la cuenta regresiva está activa, el tiempo se reduce a la mitad. ¿Cómo modificarías tu diagrama de máquina de estados para incluir este nuevo evento y acción?
 
@@ -38,3 +38,4 @@ Primero intenté traducir la lógica y la estructura que tenía en python a js. 
 #### Ahora que entiendes el patrón de máquina de estados, ¿En qué otro tipo de proyecto o sistema de entretenimiento digital crees que podrías aplicarlo?
 
 Creo que es algo que se puede aplicar perfectamente a cualquier proyecto que funcione por medio de eventos, que son la mayoría, para entender más el funcionamiento y tener vectores de prueba definidos para poder hacer buen control de errores e ir arreglando oportunamente los problemas del programa.
+
