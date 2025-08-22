@@ -259,28 +259,38 @@ function connectBtnClick() {
 
 ~~~
 
-Error de referencia. Ayuda :(
+Mejoras y detalles:
+
+20/08 Error de referencia.
+*Solucionado con rectificar:*
+~~~
+<script src="https://unpkg.com/@gohai/p5.webserial@^1/libraries/p5.webserial.js"></script>
+~~~
+
 
 #### Código del micro:bit:
 
 ~~~ py
 from microbit import * 
 uart.init(baudrate=115200)
-
-display.clear ()
+display.show(Image.DUCK)
 
 while True:
-    if button_a.was_pressed ():
+    if button_a.was_pressed():
         uart.write('A')
-    elif button_b.was_pressed ():
+    elif button_b.was_pressed():
         uart.write('B')
-    elif accelerometer.was_gesture ('shake'):
+    elif accelerometer.was_gesture('shake'):
         uart.write('S')
-    elif pin_logo.is_touched ():
+    elif pin_logo.is_touched():
         uart.write('T')
 ~~~
+Mejoras y detalles:
+
+- Agregué la linea de display.show(Image.DUCK) para verificar que se estuviera conectando y pasando la infromación correctamente
 
 #### Enlace al editor de p5.js con tu código:
 
 https://editor.p5js.org/estefaao2006/sketches/j6Me_XGWV
+
 
