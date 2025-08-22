@@ -158,10 +158,9 @@ function draw() {
     connectBtn.html("Disconnect");
   }
 
-  // lectura de datos desde micro:bit
-  let data = port.readUntil("\n");
+  let data = port.read();
   if (data.length > 0) {
-    bombTask.keyInput(data.trim()); 
+    bombTask.keyInput(data.trim());
   }
 
   background(0);
@@ -182,8 +181,7 @@ class BombTask {
 
   update() {
     if (this.state === 'CONFIG') {
-    } 
-    else if (this.state === 'ARMED') {
+    } else if (this.state === 'ARMED') {
       if (millis() - this.startTime > 1000) {
         this.startTime = millis();
         this.count--;
@@ -191,19 +189,17 @@ class BombTask {
           this.state = 'EXPLODED';
         }
       }
-    } 
+    }
   }
 
   display() {
     if (this.state === 'CONFIG') {
       text("Config: " + this.count, width/2, height/2);
       text("Aumenta: A | Disminuye: B | Armar: S", width/2, height/2 + 40);
-    } 
-    else if (this.state === 'ARMED') {
+    } else if (this.state === 'ARMED') {
       text("Tiempo: " + this.count, width/2, height/2);
       text("Introduce clave: A/B", width/2, height/2 + 40);
-    } 
-    else if (this.state === 'EXPLODED') {
+    } else if (this.state === 'EXPLODED') {
       text("BOOM!", width/2, height/2);
       text("Reinicia tocando: T", width/2, height/2 + 40);
     }
@@ -217,12 +213,10 @@ class BombTask {
         this.startTime = millis();
         this.state = 'ARMED';
       }
-    } 
-    else if (this.state === 'ARMED') {
+    } else if (this.state === 'ARMED') {
       if (k === 'A' || k === 'B') {
         this.key[this.keyindex] = k;
         this.keyindex++;
-
         if (this.keyindex === this.PASSWORD.length) {
           let passIsOK = true;
           for (let i = 0; i < this.key.length; i++) {
@@ -240,8 +234,7 @@ class BombTask {
           }
         }
       }
-    } 
-    else if (this.state === 'EXPLODED') {
+    } else if (this.state === 'EXPLODED') {
       if (k === 'T') {
         this.count = 20;
         this.startTime = millis();
@@ -263,6 +256,7 @@ function connectBtnClick() {
     port.close();
   }
 }
+
 ~~~
 
 #### Código del micro:bit:
@@ -286,3 +280,4 @@ while True:
 
 #### Enlace al editor de p5.js con tu código:
 
+https://editor.p5js.org/estefaao2006/sketches/j6Me_XGWV
