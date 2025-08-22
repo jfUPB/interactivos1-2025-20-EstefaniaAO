@@ -259,6 +259,8 @@ function connectBtnClick() {
 
 ~~~
 
+Error de referencia. Ayuda :(
+
 #### Código del micro:bit:
 
 ~~~ py
@@ -281,3 +283,4 @@ while True:
 #### Enlace al editor de p5.js con tu código:
 
 https://editor.p5js.org/estefaao2006/sketches/j6Me_XGWV
+
