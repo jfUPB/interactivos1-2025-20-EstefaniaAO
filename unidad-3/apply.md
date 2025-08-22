@@ -261,11 +261,14 @@ function connectBtnClick() {
 
 Mejoras y detalles:
 
-20/08 Error de referencia.
+- 20/08 Error de referencia.
 *Solucionado con rectificar:*
 ~~~
 <script src="https://unpkg.com/@gohai/p5.webserial@^1/libraries/p5.webserial.js"></script>
 ~~~
+
+- bombTask.keyInput(key.toUpperCase());
+*Antes no estaba el key.toUpperCase y por eso no funcionaba, ya está corregido :D*
 
 
 #### Código del micro:bit:
@@ -292,6 +295,7 @@ Mejoras y detalles:
 #### Enlace al editor de p5.js con tu código:
 
 https://editor.p5js.org/estefaao2006/sketches/j6Me_XGWV
+
 
 
 
