@@ -20,7 +20,7 @@
 let bombTask;
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(700, 700);
   textAlign(CENTER, CENTER);
   textSize(32);
   bombTask = new BombTask();
@@ -292,5 +292,6 @@ Mejoras y detalles:
 #### Enlace al editor de p5.js con tu código:
 
 https://editor.p5js.org/estefaao2006/sketches/j6Me_XGWV
+
 
 
