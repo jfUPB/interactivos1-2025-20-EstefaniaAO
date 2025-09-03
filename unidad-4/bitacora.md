@@ -182,27 +182,47 @@ function keyReleased() {
 Código modificado:
 
 ``` js
+'use strict';
+
+var formResolution = 15;
+var stepSize = 2;
+var distortionFactor = 1;
+var initRadius = 150;
+var centerX;
+var centerY;
+var x = [];
+var y = [];
+
+var filled = false;
+var drawMode = 1;
+
+// --- NUEVO: variables micro:bit ---
 let port;
 let connectBtn;
 let connectionInitialized = false;
-
-// posición del micro:bit
-let centerX = 0;
-let centerY = 0;
-
-// estados de botones
+let microBitConnected = false;
 let aState = false;
 let bState = false;
 let lastA = false;
 let lastB = false;
 
-// modo de dibujo
-let drawMode = 1; // 1=círculo, 2=línea
-
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  // init shape
+  centerX = width / 2;
+  centerY = height / 2;
+  var angle = radians(360 / formResolution);
+  for (var i = 0; i < formResolution; i++) {
+    x.push(cos(angle * i) * initRadius);
+    y.push(sin(angle * i) * initRadius);
+  }
+
+  stroke(0, 50);
+  strokeWeight(0.75);
   background(255);
 
+  // --- NUEVO: botón para conectar micro:bit ---
   port = createSerial();
   connectBtn = createButton("Connect to micro:bit");
   connectBtn.position(10, 10);
@@ -215,6 +235,92 @@ function connectBtnClick() {
     connectionInitialized = false;
   } else {
     port.close();
+  }
+}
+
+function draw() {
+  // --- NUEVO: no empezar hasta conectar micro:bit ---
+  if (!port.opened()) return;
+
+  if (port.opened() && !connectionInitialized) {
+    port.clear();
+    connectionInitialized = true;
+  }
+
+  if (port.availableBytes() > 0) {
+    let data = port.readUntil("\n");
+    if (data) {
+      let values = data.trim().split(",");
+      if (values.length === 4) {
+        centerX = map(int(values[0]), -1024, 1024, 0, width);
+        centerY = map(int(values[1]), -1024, 1024, 0, height);
+        aState = values[2].toLowerCase() === "true";
+        bState = values[3].toLowerCase() === "true";
+      }
+    }
+  }
+
+  // flancos
+  if (aState && !lastA) {
+    microbitPressed();
+  }
+  if (bState && !lastB) {
+    drawMode = (drawMode === 1) ? 2 : 1;
+  }
+  lastA = aState;
+  lastB = bState;
+}
+
+// === Función reemplazo de mousePressed() ===
+function microbitPressed() {
+  // init shape en posición del micro:bit
+  switch (drawMode) {
+  case 1: // circle
+    var angle = radians(360 / formResolution);
+    var radius = initRadius * random(0.5, 1);
+    for (var i = 0; i < formResolution; i++) {
+      x[i] = cos(angle * i) * radius;
+      y[i] = sin(angle * i) * radius;
+    }
+    break;
+  case 2: // line
+    var radius = initRadius * random(0.5, 5);
+    var angle = random(PI);
+
+    var x1 = cos(angle) * radius;
+    var y1 = sin(angle) * radius;
+    var x2 = cos(angle - PI) * radius;
+    var y2 = sin(angle - PI) * radius;
+    for (var i = 0; i < formResolution; i++) {
+      x[i] = lerp(x1, x2, i / formResolution);
+      y[i] = lerp(y1, y2, i / formResolution);
+    }
+    break;
+  }
+}
+
+// dibujo (sin cambios)
+function drawShape() {
+  switch (drawMode) {
+  case 1: // circle
+    beginShape();
+    curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
+    for (var i = 0; i < formResolution; i++) {
+      curveVertex(x[i] + centerX, y[i] + centerY);
+    }
+    curveVertex(x[0] + centerX, y[0] + centerY);
+    curveVertex(x[1] + centerX, y[1] + centerY);
+    endShape();
+    break;
+  case 2: // line
+    beginShape();
+    curveVertex(x[0] + centerX, y[0] + centerY);
+    for (var i = 0; i < formResolution; i++) {
+      curveVertex(x[i] + centerX, y[i] + centerY);
+    }
+    curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
+    endShape();
+    break;
   }
 }
 
@@ -239,26 +345,16 @@ function draw() {
     }
   }
 
-  // detección de flanco
   if (aState && !lastA) {
-    microbitClick();
+    microbitPressed();
   }
   if (bState && !lastB) {
     drawMode = (drawMode === 1) ? 2 : 1;
   }
-
   lastA = aState;
   lastB = bState;
-}
 
-function microbitClick() {
-  noStroke();
-  fill(random(255), random(255), random(255), 150);
-  if (drawMode === 1) {
-    circle(centerX, centerY, 40);
-  } else {
-    line(centerX - 20, centerY, centerX + 20, centerY);
-  }
+  drawShape();
 }
 
 ```
@@ -266,6 +362,7 @@ function microbitClick() {
 ## Video
 
 [Video demostratativo](URL)
+
 
 
 
