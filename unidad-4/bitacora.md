@@ -182,28 +182,29 @@ function keyReleased() {
 Código modificado:
 
 ``` js
-'use strict';
-
 let formResolution = 15;
 let stepSize = 2;
 let initRadius = 150;
 let centerX, centerY;
 let x = [];
 let y = [];
-let drawMode = 1; // 1 = círculo, 2 = línea
+let drawMode = 1;
 
-let port;
-let connectBtn;
-let connectionInitialized = false;
-let lastA = 0;
-let lastB = 0;
+let port, connectBtn, connectionInitialized = false;
+let lastA = 0, lastB = 0;
+
+// posición suavizada
+let targetX, targetY;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  // posición inicial en el centro
+  // centro inicial
   centerX = width / 2;
   centerY = height / 2;
+  targetX = centerX;
+  targetY = centerY;
+
   let angle = radians(360 / formResolution);
   for (let i = 0; i < formResolution; i++) {
     x.push(cos(angle * i) * initRadius);
@@ -214,7 +215,7 @@ function setup() {
   strokeWeight(0.75);
   background(255);
 
-  // botón de conexión micro:bit
+  // micro:bit
   port = createSerial();
   connectBtn = createButton("Connect to micro:bit");
   connectBtn.position(80, 80);
@@ -237,16 +238,16 @@ function draw() {
       let aState = int(values[2]);
       let bState = int(values[3]);
 
-      // mapear acelerómetro a la pantalla
-      centerX = map(xValue, -1024, 1024, 0, width);
-      centerY = map(yValue, -1024, 1024, 0, height);
+      // en lugar de mapear todo → mover poco desde el centro
+      targetX = width / 2 + map(xValue, -1024, 1024, -200, 200);
+      targetY = height / 2 + map(yValue, -1024, 1024, -200, 200);
 
       // botón A → click
       if (aState === 1 && lastA === 0) {
         microbitClick();
       }
 
-      // botón B → cambia entre círculo/línea
+      // botón B → cambiar modo
       if (bState === 1 && lastB === 0) {
         drawMode = (drawMode === 1) ? 2 : 1;
       }
@@ -256,7 +257,11 @@ function draw() {
     }
   }
 
-  // mover los puntos un poco
+  // suavizar movimiento (interpolación)
+  centerX = lerp(centerX, targetX, 0.2);
+  centerY = lerp(centerY, targetY, 0.2);
+
+  // mover puntos
   for (let i = 0; i < formResolution; i++) {
     x[i] += random(-stepSize, stepSize);
     y[i] += random(-stepSize, stepSize);
@@ -264,33 +269,30 @@ function draw() {
 
   noFill();
 
-  // dibujar según el modo
-  switch (drawMode) {
-    case 1: // círculo
-      beginShape();
-      curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
-      for (let i = 0; i < formResolution; i++) {
-        curveVertex(x[i] + centerX, y[i] + centerY);
-      }
-      curveVertex(x[0] + centerX, y[0] + centerY);
-      curveVertex(x[1] + centerX, y[1] + centerY);
-      endShape();
-      break;
-    case 2: // línea
-      beginShape();
-      curveVertex(x[0] + centerX, y[0] + centerY);
-      for (let i = 0; i < formResolution; i++) {
-        curveVertex(x[i] + centerX, y[i] + centerY);
-      }
-      curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
-      endShape();
-      break;
+  if (drawMode === 1) {
+    // círculo
+    beginShape();
+    curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
+    for (let i = 0; i < formResolution; i++) {
+      curveVertex(x[i] + centerX, y[i] + centerY);
+    }
+    curveVertex(x[0] + centerX, y[0] + centerY);
+    curveVertex(x[1] + centerX, y[1] + centerY);
+    endShape();
+  } else {
+    // línea
+    beginShape();
+    curveVertex(x[0] + centerX, y[0] + centerY);
+    for (let i = 0; i < formResolution; i++) {
+      curveVertex(x[i] + centerX, y[i] + centerY);
+    }
+    curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
+    endShape();
   }
 }
 
 function microbitClick() {
   if (drawMode === 1) {
-    // círculo
     let angle = radians(360 / formResolution);
     let radius = initRadius * random(0.5, 1);
     for (let i = 0; i < formResolution; i++) {
@@ -298,7 +300,6 @@ function microbitClick() {
       y[i] = sin(angle * i) * radius;
     }
   } else {
-    // línea
     let radiusL = initRadius * random(0.5, 5);
     let angleL = random(PI);
     let x1 = cos(angleL) * radiusL;
@@ -326,6 +327,7 @@ function connectBtnClick() {
 ## Video
 
 [Video demostratativo](URL)
+
 
 
 
