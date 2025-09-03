@@ -182,11 +182,157 @@ function keyReleased() {
 Código modificado:
 
 ``` js
+'use strict';
+
+let formResolution = 15;
+let stepSize = 2;
+let initRadius = 150;
+let centerX;
+let centerY;
+let x = [];
+let y = [];
+
+let filled = false;
+let drawMode = 1;
+
+let port;
+let connectBtn;
+let connectionInitialized = false;
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+
+  // init shape
+  centerX = width / 2;
+  centerY = height / 2;
+  let angle = radians(360 / formResolution);
+  for (let i = 0; i < formResolution; i++) {
+    x.push(cos(angle * i) * initRadius);
+    y.push(sin(angle * i) * initRadius);
+  }
+
+  stroke(0, 50);
+  strokeWeight(0.75);
+  background(255);
+
+  // serial
+  port = createSerial();
+  connectBtn = createButton("Connect to micro:bit");
+  connectBtn.position(40, 40);
+  connectBtn.mousePressed(connectBtnClick);
+}
+
+function draw() {
+  // Si el puerto se abre por primera vez
+  if (port.opened() && !connectionInitialized) {
+    port.clear();
+    connectionInitialized = true;
+  }
+
+  // Botón dinámico
+  if (!port.opened()) {
+    connectBtn.html("Connect to micro:bit");
+  } else {
+    connectBtn.html("Disconnect");
+  }
+
+  // Leer línea del micro:bit
+  let line = port.readUntil("\n");
+  if (line.length > 0) {
+    let values = split(trim(line), ",");
+    if (values.length === 4) {
+      let xValue = int(values[0]);
+      let yValue = int(values[1]);
+      let aState = int(values[2]);
+      let bState = int(values[3]);
+
+      // Mapear acelerómetro a la pantalla
+      centerX += (map(xValue, -1024, 1024, 0, width) - centerX) * 0.05;
+      centerY += (map(yValue, -1024, 1024, 0, height) - centerY) * 0.05;
+
+      // Botón A → toggle fill
+      if (aState === 1) filled = !filled;
+
+      // Botón B → alternar forma
+      if (bState === 1) drawMode = (drawMode === 1 ? 2 : 1);
+    }
+  }
+
+  // calcular nuevos puntos
+  for (let i = 0; i < formResolution; i++) {
+    x[i] += random(-stepSize, stepSize);
+    y[i] += random(-stepSize, stepSize);
+  }
+
+  if (filled) {
+    fill(random(255));
+  } else {
+    noFill();
+  }
+
+  switch (drawMode) {
+    case 1: // círculo
+      beginShape();
+      curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
+      for (let i = 0; i < formResolution; i++) {
+        curveVertex(x[i] + centerX, y[i] + centerY);
+      }
+      curveVertex(x[0] + centerX, y[0] + centerY);
+      curveVertex(x[1] + centerX, y[1] + centerY);
+      endShape();
+      break;
+    case 2: // línea
+      beginShape();
+      curveVertex(x[0] + centerX, y[0] + centerY);
+      for (let i = 0; i < formResolution; i++) {
+        curveVertex(x[i] + centerX, y[i] + centerY);
+      }
+      curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
+      endShape();
+      break;
+  }
+}
+
+function mousePressed() {
+  // reiniciar forma con click
+  centerX = mouseX;
+  centerY = mouseY;
+
+  if (drawMode === 1) {
+    let angle = radians(360 / formResolution);
+    let radius = initRadius * random(0.5, 1);
+    for (let i = 0; i < formResolution; i++) {
+      x[i] = cos(angle * i) * radius;
+      y[i] = sin(angle * i) * radius;
+    }
+  } else if (drawMode === 2) {
+    let radius = initRadius * random(0.5, 5);
+    let angle = random(PI);
+    let x1 = cos(angle) * radius;
+    let y1 = sin(angle) * radius;
+    let x2 = cos(angle - PI) * radius;
+    let y2 = sin(angle - PI) * radius;
+    for (let i = 0; i < formResolution; i++) {
+      x[i] = lerp(x1, x2, i / formResolution);
+      y[i] = lerp(y1, y2, i / formResolution);
+    }
+  }
+}
+
+function connectBtnClick() {
+  if (!port.opened()) {
+    port.open("MicroPython", 115200);
+    connectionInitialized = false;
+  } else {
+    port.close();
+  }
+}
 
 ```
 
 ## Video
 
 [Video demostratativo](URL)
+
 
 
