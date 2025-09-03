@@ -190,17 +190,18 @@ let initRadius = 150;
 let centerX, centerY;
 let x = [];
 let y = [];
+let drawMode = 1; // 1 = círculo, 2 = línea
 
-let filled = false;
-let drawMode = 1;
 let port;
 let connectBtn;
 let connectionInitialized = false;
+let lastA = 0;
+let lastB = 0;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  // init shape
+  // posición inicial en el centro
   centerX = width / 2;
   centerY = height / 2;
   let angle = radians(360 / formResolution);
@@ -213,13 +214,11 @@ function setup() {
   strokeWeight(0.75);
   background(255);
 
-  // conexión micro:bit
+  // botón de conexión micro:bit
   port = createSerial();
   connectBtn = createButton("Connect to micro:bit");
   connectBtn.position(80, 80);
   connectBtn.mousePressed(connectBtnClick);
-  textAlign(CENTER, CENTER);
-  textSize(32);
 }
 
 function draw() {
@@ -227,11 +226,7 @@ function draw() {
     port.clear();
     connectionInitialized = true;
   }
-  if (!port.opened()) {
-    connectBtn.html("Connect to micro:bit");
-  } else {
-    connectBtn.html("Disconnect");
-  }
+  connectBtn.html(port.opened() ? "Disconnect" : "Connect to micro:bit");
 
   let data = port.readUntil("\n");
   if (data.length > 0) {
@@ -246,32 +241,32 @@ function draw() {
       centerX = map(xValue, -1024, 1024, 0, width);
       centerY = map(yValue, -1024, 1024, 0, height);
 
-      // botón A = click → genera nueva forma
-      if (aState === 1) {
+      // botón A → click
+      if (aState === 1 && lastA === 0) {
         microbitClick();
       }
 
-      // botón B = cambia entre círculo/linea
-      if (bState === 1) {
+      // botón B → cambia entre círculo/línea
+      if (bState === 1 && lastB === 0) {
         drawMode = (drawMode === 1) ? 2 : 1;
       }
+
+      lastA = aState;
+      lastB = bState;
     }
   }
 
-  // calcular nuevos puntos
+  // mover los puntos un poco
   for (let i = 0; i < formResolution; i++) {
     x[i] += random(-stepSize, stepSize);
     y[i] += random(-stepSize, stepSize);
   }
 
-  if (filled) {
-    fill(random(255));
-  } else {
-    noFill();
-  }
+  noFill();
 
+  // dibujar según el modo
   switch (drawMode) {
-    case 1: // circle
+    case 1: // círculo
       beginShape();
       curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
       for (let i = 0; i < formResolution; i++) {
@@ -281,7 +276,7 @@ function draw() {
       curveVertex(x[1] + centerX, y[1] + centerY);
       endShape();
       break;
-    case 2: // line
+    case 2: // línea
       beginShape();
       curveVertex(x[0] + centerX, y[0] + centerY);
       for (let i = 0; i < formResolution; i++) {
@@ -294,28 +289,26 @@ function draw() {
 }
 
 function microbitClick() {
-  // genera nueva figura en la posición actual
-  switch (drawMode) {
-    case 1: // circle
-      let angle = radians(360 / formResolution);
-      let radius = initRadius * random(0.5, 1);
-      for (let i = 0; i < formResolution; i++) {
-        x[i] = cos(angle * i) * radius;
-        y[i] = sin(angle * i) * radius;
-      }
-      break;
-    case 2: // line
-      let radiusL = initRadius * random(0.5, 5);
-      let angleL = random(PI);
-      let x1 = cos(angleL) * radiusL;
-      let y1 = sin(angleL) * radiusL;
-      let x2 = cos(angleL - PI) * radiusL;
-      let y2 = sin(angleL - PI) * radiusL;
-      for (let i = 0; i < formResolution; i++) {
-        x[i] = lerp(x1, x2, i / formResolution);
-        y[i] = lerp(y1, y2, i / formResolution);
-      }
-      break;
+  if (drawMode === 1) {
+    // círculo
+    let angle = radians(360 / formResolution);
+    let radius = initRadius * random(0.5, 1);
+    for (let i = 0; i < formResolution; i++) {
+      x[i] = cos(angle * i) * radius;
+      y[i] = sin(angle * i) * radius;
+    }
+  } else {
+    // línea
+    let radiusL = initRadius * random(0.5, 5);
+    let angleL = random(PI);
+    let x1 = cos(angleL) * radiusL;
+    let y1 = sin(angleL) * radiusL;
+    let x2 = cos(angleL - PI) * radiusL;
+    let y2 = sin(angleL - PI) * radiusL;
+    for (let i = 0; i < formResolution; i++) {
+      x[i] = lerp(x1, x2, i / formResolution);
+      y[i] = lerp(y1, y2, i / formResolution);
+    }
   }
 }
 
@@ -333,6 +326,7 @@ function connectBtnClick() {
 ## Video
 
 [Video demostratativo](URL)
+
 
 
 
