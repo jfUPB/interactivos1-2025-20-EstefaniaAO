@@ -182,135 +182,31 @@ function keyReleased() {
 Código modificado:
 
 ``` js
-let formResolution = 15;
-let stepSize = 2;
-let initRadius = 150;
-let centerX, centerY;
-let x = [];
-let y = [];
-let drawMode = 1;
+let port;
+let connectBtn;
+let connectionInitialized = false;
 
-let port, connectBtn, connectionInitialized = false;
-let lastA = 0, lastB = 0;
+// posición del micro:bit
+let centerX = 0;
+let centerY = 0;
 
-// posición suavizada
-let targetX, targetY;
+// estados de botones
+let aState = false;
+let bState = false;
+let lastA = false;
+let lastB = false;
+
+// modo de dibujo
+let drawMode = 1; // 1=círculo, 2=línea
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
-  // centro inicial
-  centerX = width / 2;
-  centerY = height / 2;
-  targetX = centerX;
-  targetY = centerY;
-
-  let angle = radians(360 / formResolution);
-  for (let i = 0; i < formResolution; i++) {
-    x.push(cos(angle * i) * initRadius);
-    y.push(sin(angle * i) * initRadius);
-  }
-
-  stroke(0, 50);
-  strokeWeight(0.75);
   background(255);
 
-  // micro:bit
   port = createSerial();
   connectBtn = createButton("Connect to micro:bit");
-  connectBtn.position(80, 80);
+  connectBtn.position(10, 10);
   connectBtn.mousePressed(connectBtnClick);
-}
-
-function draw() {
-  if (port.opened() && !connectionInitialized) {
-    port.clear();
-    connectionInitialized = true;
-  }
-  connectBtn.html(port.opened() ? "Disconnect" : "Connect to micro:bit");
-
-  let data = port.readUntil("\n");
-  if (data.length > 0) {
-    let values = data.trim().split(",");
-    if (values.length === 4) {
-      let xValue = int(values[0]);
-      let yValue = int(values[1]);
-      let aState = int(values[2]);
-      let bState = int(values[3]);
-
-      // en lugar de mapear todo → mover poco desde el centro
-      targetX = width / 2 + map(xValue, -1024, 1024, -200, 200);
-      targetY = height / 2 + map(yValue, -1024, 1024, -200, 200);
-
-      // botón A → click
-      if (aState === 1 && lastA === 0) {
-        microbitClick();
-      }
-
-      // botón B → cambiar modo
-      if (bState === 1 && lastB === 0) {
-        drawMode = (drawMode === 1) ? 2 : 1;
-      }
-
-      lastA = aState;
-      lastB = bState;
-    }
-  }
-
-  // suavizar movimiento (interpolación)
-  centerX = lerp(centerX, targetX, 0.2);
-  centerY = lerp(centerY, targetY, 0.2);
-
-  // mover puntos
-  for (let i = 0; i < formResolution; i++) {
-    x[i] += random(-stepSize, stepSize);
-    y[i] += random(-stepSize, stepSize);
-  }
-
-  noFill();
-
-  if (drawMode === 1) {
-    // círculo
-    beginShape();
-    curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
-    for (let i = 0; i < formResolution; i++) {
-      curveVertex(x[i] + centerX, y[i] + centerY);
-    }
-    curveVertex(x[0] + centerX, y[0] + centerY);
-    curveVertex(x[1] + centerX, y[1] + centerY);
-    endShape();
-  } else {
-    // línea
-    beginShape();
-    curveVertex(x[0] + centerX, y[0] + centerY);
-    for (let i = 0; i < formResolution; i++) {
-      curveVertex(x[i] + centerX, y[i] + centerY);
-    }
-    curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
-    endShape();
-  }
-}
-
-function microbitClick() {
-  if (drawMode === 1) {
-    let angle = radians(360 / formResolution);
-    let radius = initRadius * random(0.5, 1);
-    for (let i = 0; i < formResolution; i++) {
-      x[i] = cos(angle * i) * radius;
-      y[i] = sin(angle * i) * radius;
-    }
-  } else {
-    let radiusL = initRadius * random(0.5, 5);
-    let angleL = random(PI);
-    let x1 = cos(angleL) * radiusL;
-    let y1 = sin(angleL) * radiusL;
-    let x2 = cos(angleL - PI) * radiusL;
-    let y2 = sin(angleL - PI) * radiusL;
-    for (let i = 0; i < formResolution; i++) {
-      x[i] = lerp(x1, x2, i / formResolution);
-      y[i] = lerp(y1, y2, i / formResolution);
-    }
-  }
 }
 
 function connectBtnClick() {
@@ -322,11 +218,55 @@ function connectBtnClick() {
   }
 }
 
+function draw() {
+  if (!port.opened()) return;
+
+  if (port.opened() && !connectionInitialized) {
+    port.clear();
+    connectionInitialized = true;
+  }
+
+  if (port.availableBytes() > 0) {
+    let data = port.readUntil("\n");
+    if (data) {
+      let values = data.trim().split(",");
+      if (values.length === 4) {
+        centerX = map(int(values[0]), -1024, 1024, 0, width);
+        centerY = map(int(values[1]), -1024, 1024, 0, height);
+        aState = values[2].toLowerCase() === "true";
+        bState = values[3].toLowerCase() === "true";
+      }
+    }
+  }
+
+  // detección de flanco
+  if (aState && !lastA) {
+    microbitClick();
+  }
+  if (bState && !lastB) {
+    drawMode = (drawMode === 1) ? 2 : 1;
+  }
+
+  lastA = aState;
+  lastB = bState;
+}
+
+function microbitClick() {
+  noStroke();
+  fill(random(255), random(255), random(255), 150);
+  if (drawMode === 1) {
+    circle(centerX, centerY, 40);
+  } else {
+    line(centerX - 20, centerY, centerX + 20, centerY);
+  }
+}
+
 ```
 
 ## Video
 
 [Video demostratativo](URL)
+
 
 
 
