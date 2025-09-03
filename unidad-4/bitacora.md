@@ -187,14 +187,12 @@ Código modificado:
 let formResolution = 15;
 let stepSize = 2;
 let initRadius = 150;
-let centerX;
-let centerY;
+let centerX, centerY;
 let x = [];
 let y = [];
 
 let filled = false;
 let drawMode = 1;
-
 let port;
 let connectBtn;
 let connectionInitialized = false;
@@ -215,46 +213,48 @@ function setup() {
   strokeWeight(0.75);
   background(255);
 
-  // serial
+  // conexión micro:bit
   port = createSerial();
   connectBtn = createButton("Connect to micro:bit");
-  connectBtn.position(40, 40);
+  connectBtn.position(80, 80);
   connectBtn.mousePressed(connectBtnClick);
+  textAlign(CENTER, CENTER);
+  textSize(32);
 }
 
 function draw() {
-  // Si el puerto se abre por primera vez
   if (port.opened() && !connectionInitialized) {
     port.clear();
     connectionInitialized = true;
   }
-
-  // Botón dinámico
   if (!port.opened()) {
     connectBtn.html("Connect to micro:bit");
   } else {
     connectBtn.html("Disconnect");
   }
 
-  // Leer línea del micro:bit
-  let line = port.readUntil("\n");
-  if (line.length > 0) {
-    let values = split(trim(line), ",");
+  let data = port.readUntil("\n");
+  if (data.length > 0) {
+    let values = data.trim().split(",");
     if (values.length === 4) {
       let xValue = int(values[0]);
       let yValue = int(values[1]);
       let aState = int(values[2]);
       let bState = int(values[3]);
 
-      // Mapear acelerómetro a la pantalla
-      centerX += (map(xValue, -1024, 1024, 0, width) - centerX) * 0.05;
-      centerY += (map(yValue, -1024, 1024, 0, height) - centerY) * 0.05;
+      // mapear acelerómetro a la pantalla
+      centerX = map(xValue, -1024, 1024, 0, width);
+      centerY = map(yValue, -1024, 1024, 0, height);
 
-      // Botón A → toggle fill
-      if (aState === 1) filled = !filled;
+      // botón A = click → genera nueva forma
+      if (aState === 1) {
+        microbitClick();
+      }
 
-      // Botón B → alternar forma
-      if (bState === 1) drawMode = (drawMode === 1 ? 2 : 1);
+      // botón B = cambia entre círculo/linea
+      if (bState === 1) {
+        drawMode = (drawMode === 1) ? 2 : 1;
+      }
     }
   }
 
@@ -271,7 +271,7 @@ function draw() {
   }
 
   switch (drawMode) {
-    case 1: // círculo
+    case 1: // circle
       beginShape();
       curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
       for (let i = 0; i < formResolution; i++) {
@@ -281,7 +281,7 @@ function draw() {
       curveVertex(x[1] + centerX, y[1] + centerY);
       endShape();
       break;
-    case 2: // línea
+    case 2: // line
       beginShape();
       curveVertex(x[0] + centerX, y[0] + centerY);
       for (let i = 0; i < formResolution; i++) {
@@ -293,29 +293,29 @@ function draw() {
   }
 }
 
-function mousePressed() {
-  // reiniciar forma con click
-  centerX = mouseX;
-  centerY = mouseY;
-
-  if (drawMode === 1) {
-    let angle = radians(360 / formResolution);
-    let radius = initRadius * random(0.5, 1);
-    for (let i = 0; i < formResolution; i++) {
-      x[i] = cos(angle * i) * radius;
-      y[i] = sin(angle * i) * radius;
-    }
-  } else if (drawMode === 2) {
-    let radius = initRadius * random(0.5, 5);
-    let angle = random(PI);
-    let x1 = cos(angle) * radius;
-    let y1 = sin(angle) * radius;
-    let x2 = cos(angle - PI) * radius;
-    let y2 = sin(angle - PI) * radius;
-    for (let i = 0; i < formResolution; i++) {
-      x[i] = lerp(x1, x2, i / formResolution);
-      y[i] = lerp(y1, y2, i / formResolution);
-    }
+function microbitClick() {
+  // genera nueva figura en la posición actual
+  switch (drawMode) {
+    case 1: // circle
+      let angle = radians(360 / formResolution);
+      let radius = initRadius * random(0.5, 1);
+      for (let i = 0; i < formResolution; i++) {
+        x[i] = cos(angle * i) * radius;
+        y[i] = sin(angle * i) * radius;
+      }
+      break;
+    case 2: // line
+      let radiusL = initRadius * random(0.5, 5);
+      let angleL = random(PI);
+      let x1 = cos(angleL) * radiusL;
+      let y1 = sin(angleL) * radiusL;
+      let x2 = cos(angleL - PI) * radiusL;
+      let y2 = sin(angleL - PI) * radiusL;
+      for (let i = 0; i < formResolution; i++) {
+        x[i] = lerp(x1, x2, i / formResolution);
+        y[i] = lerp(y1, y2, i / formResolution);
+      }
+      break;
   }
 }
 
@@ -333,6 +333,7 @@ function connectBtnClick() {
 ## Video
 
 [Video demostratativo](URL)
+
 
 
 
