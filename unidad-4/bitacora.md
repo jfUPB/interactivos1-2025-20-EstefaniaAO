@@ -192,10 +192,25 @@ let y = [];
 let drawMode = 1;
 
 let port, connectBtn, connectionInitialized = false;
-let lastA = 0, lastB = 0;
+let lastA = false, lastB = false; // <-- booleans
 
 // posición suavizada
 let targetX, targetY;
+
+// helper: bytes disponibles (soporta availableBytes() o available())
+function bytesAvailable() {
+  if (!port) return 0;
+  if (typeof port.availableBytes === 'function') return port.availableBytes();
+  if (typeof port.available === 'function') return port.available();
+  return 0;
+}
+
+// helper: convertir "True"/"true"/"1" a boolean
+function toBool(s) {
+  if (!s) return false;
+  const t = String(s).trim().toLowerCase();
+  return t === 'true' || t === '1';
+}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -224,41 +239,44 @@ function setup() {
 }
 
 function draw() {
-  // --- no hacer nada si no está conectado ---
+  // no empezar hasta que se conecte el micro:bit
   if (!port.opened()) {
     connectBtn.html("Connect to micro:bit");
-    return;
-  } else {
-    connectBtn.html("Disconnect");
+    return; // <-- clave
   }
+  connectBtn.html("Disconnect");
 
-  if (!connectionInitialized) {
+  if (port.opened() && !connectionInitialized) {
     port.clear();
     connectionInitialized = true;
   }
 
-  // --- leer datos solo si hay bytes disponibles ---
-  if (port.availableBytes() > 0) {
+  // leer datos solo si hay bytes disponibles
+  if (bytesAvailable() > 0) {
     let data = port.readUntil("\n");
-    if (data.length > 0) {
+    if (data && data.length > 0) {
       let values = data.trim().split(",");
       if (values.length === 4) {
-        let xValue = int(values[0]);
-        let yValue = int(values[1]);
-        let aState = int(values[2]);
-        let bState = int(values[3]);
-
-        targetX = width / 2 + map(xValue, -1024, 1024, -200, 200);
-        targetY = height / 2 + map(yValue, -1024, 1024, -200, 200);
-
-        // botón A → click
-        if (aState === 1 && lastA === 0) {
-          microbitClick();
+        // acelerómetro
+        const xValue = parseInt(values[0], 10);
+        const yValue = parseInt(values[1], 10);
+        if (!Number.isNaN(xValue)) {
+          targetX = width / 2 + map(xValue, -1024, 1024, -200, 200);
+        }
+        if (!Number.isNaN(yValue)) {
+          targetY = height / 2 + map(yValue, -1024, 1024, -200, 200);
         }
 
-        // botón B → cambiar modo
-        if (bState === 1 && lastB === 0) {
-          drawMode = (drawMode === 1) ? 2 : 1;
+        // botones (robusto a "True"/"true"/"1")
+        const aState = toBool(values[2]);
+        const bState = toBool(values[3]);
+
+        // flancos
+        if (aState && !lastA) {
+          microbitClick();               // A = click (nueva forma)
+        }
+        if (bState && !lastB) {
+          drawMode = (drawMode === 1) ? 2 : 1;  // B = alternar modo
         }
 
         lastA = aState;
@@ -370,6 +388,7 @@ INDEX
 ## Video
 
 [Video demostratativo](URL)
+
 
 
 
