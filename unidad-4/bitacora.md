@@ -177,7 +177,7 @@ function keyReleased() {
 
 ```
 
-[Enlace a la aplicación modificada](URL)
+[Enlace a la aplicación modificada](https://editor.p5js.org/estefaao2006/full/1ECYjQmHW)
 
 Código modificado:
 
@@ -261,10 +261,10 @@ function draw() {
         const xValue = parseInt(values[0], 10);
         const yValue = parseInt(values[1], 10);
         if (!Number.isNaN(xValue)) {
-          targetX = width / 2 + map(xValue, -1024, 1024, -200, 200);
+          targetX = map(xValue, -1024, 1024, 0, width);
         }
         if (!Number.isNaN(yValue)) {
-          targetY = height / 2 + map(yValue, -1024, 1024, -200, 200);
+          targetY = map(yValue, -1024, 1024, 0, height);
         }
 
         // botones (robusto a "True"/"true"/"1")
@@ -388,6 +388,7 @@ INDEX
 ## Video
 
 [Video demostratativo](URL)
+
 
 
 
