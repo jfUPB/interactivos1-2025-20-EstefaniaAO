@@ -224,36 +224,46 @@ function setup() {
 }
 
 function draw() {
-  if (port.opened() && !connectionInitialized) {
+  // --- no hacer nada si no está conectado ---
+  if (!port.opened()) {
+    connectBtn.html("Connect to micro:bit");
+    return;
+  } else {
+    connectBtn.html("Disconnect");
+  }
+
+  if (!connectionInitialized) {
     port.clear();
     connectionInitialized = true;
   }
-  connectBtn.html(port.opened() ? "Disconnect" : "Connect to micro:bit");
 
-  let data = port.readUntil("\n");
-  if (data.length > 0) {
-    let values = data.trim().split(",");
-    if (values.length === 4) {
-      let xValue = int(values[0]);
-      let yValue = int(values[1]);
-      let aState = int(values[2]);
-      let bState = int(values[3]);
+  // --- leer datos solo si hay bytes disponibles ---
+  if (port.availableBytes() > 0) {
+    let data = port.readUntil("\n");
+    if (data.length > 0) {
+      let values = data.trim().split(",");
+      if (values.length === 4) {
+        let xValue = int(values[0]);
+        let yValue = int(values[1]);
+        let aState = int(values[2]);
+        let bState = int(values[3]);
 
-      targetX = width / 2 + map(xValue, -1024, 1024, -200, 200);
-      targetY = height / 2 + map(yValue, -1024, 1024, -200, 200);
+        targetX = width / 2 + map(xValue, -1024, 1024, -200, 200);
+        targetY = height / 2 + map(yValue, -1024, 1024, -200, 200);
 
-      // botón A → click
-      if (aState === 1 && lastA === 0) {
-        microbitClick();
+        // botón A → click
+        if (aState === 1 && lastA === 0) {
+          microbitClick();
+        }
+
+        // botón B → cambiar modo
+        if (bState === 1 && lastB === 0) {
+          drawMode = (drawMode === 1) ? 2 : 1;
+        }
+
+        lastA = aState;
+        lastB = bState;
       }
-
-      // botón B → cambiar modo
-      if (bState === 1 && lastB === 0) {
-        drawMode = (drawMode === 1) ? 2 : 1;
-      }
-
-      lastA = aState;
-      lastB = bState;
     }
   }
 
@@ -321,7 +331,6 @@ function connectBtnClick() {
     port.close();
   }
 }
-
 ```
 INDEX
 ``` js
@@ -361,6 +370,7 @@ INDEX
 ## Video
 
 [Video demostratativo](URL)
+
 
 
 
