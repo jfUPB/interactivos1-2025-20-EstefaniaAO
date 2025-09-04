@@ -267,11 +267,10 @@ function draw() {
           targetY = map(yValue, -1024, 1024, 0, height);
         }
 
-        // botones (robusto a "True"/"true"/"1")
+        // botones
         const aState = toBool(values[2]);
         const bState = toBool(values[3]);
 
-        // flancos
         if (aState && !lastA) {
           microbitClick();               // A = click (nueva forma)
         }
@@ -388,6 +387,7 @@ INDEX
 ## Video
 
 [Video demostratativo](https://youtu.be/cXPEfryDrNU)
+
 
 
 
