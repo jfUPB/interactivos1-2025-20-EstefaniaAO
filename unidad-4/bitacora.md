@@ -192,12 +192,12 @@ let y = [];
 let drawMode = 1;
 
 let port, connectBtn, connectionInitialized = false;
-let lastA = false, lastB = false; // <-- booleans
+let lastA = false, lastB = false; 
 
-// posición suavizada
+
 let targetX, targetY;
 
-// helper: bytes disponibles (soporta availableBytes() o available())
+
 function bytesAvailable() {
   if (!port) return 0;
   if (typeof port.availableBytes === 'function') return port.availableBytes();
@@ -205,7 +205,7 @@ function bytesAvailable() {
   return 0;
 }
 
-// helper: convertir "True"/"true"/"1" a boolean
+
 function toBool(s) {
   if (!s) return false;
   const t = String(s).trim().toLowerCase();
@@ -285,7 +285,7 @@ function draw() {
     }
   }
 
-  // suavizar movimiento (interpolación)
+  // interpolación (porque se veia muy lageado)
   centerX = lerp(centerX, targetX, 0.2);
   centerY = lerp(centerY, targetY, 0.2);
 
@@ -388,6 +388,7 @@ INDEX
 ## Video
 
 [Video demostratativo](https://youtu.be/cXPEfryDrNU)
+
 
 
 
