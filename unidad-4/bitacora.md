@@ -261,7 +261,7 @@ function draw() {
     }
   }
 
-  // suavizar movimiento
+  // suavizar movimiento con interpolación porque se veía lagueado
   centerX = lerp(centerX, targetX, 0.2);
   centerY = lerp(centerY, targetY, 0.2);
 
@@ -363,6 +363,7 @@ INDEX
 ## Video
 
 [Video demostratativo](https://youtu.be/cXPEfryDrNU)
+
 
 
 
