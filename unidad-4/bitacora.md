@@ -192,25 +192,9 @@ let y = [];
 let drawMode = 1;
 
 let port, connectBtn, connectionInitialized = false;
-let lastA = false, lastB = false; 
 
-
+// posición suavizada
 let targetX, targetY;
-
-
-function bytesAvailable() {
-  if (!port) return 0;
-  if (typeof port.availableBytes === 'function') return port.availableBytes();
-  if (typeof port.available === 'function') return port.available();
-  return 0;
-}
-
-
-function toBool(s) {
-  if (!s) return false;
-  const t = String(s).trim().toLowerCase();
-  return t === 'true' || t === '1';
-}
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -239,10 +223,9 @@ function setup() {
 }
 
 function draw() {
-  // no empezar hasta que se conecte el micro:bit
   if (!port.opened()) {
     connectBtn.html("Connect to micro:bit");
-    return; // <-- clave
+    return;
   }
   connectBtn.html("Disconnect");
 
@@ -251,8 +234,8 @@ function draw() {
     connectionInitialized = true;
   }
 
-  // leer datos solo si hay bytes disponibles
-  if (bytesAvailable() > 0) {
+  // leer datos del puerto
+  if (port.available() > 0) {
     let data = port.readUntil("\n");
     if (data && data.length > 0) {
       let values = data.trim().split(",");
@@ -267,24 +250,18 @@ function draw() {
           targetY = map(yValue, -1024, 1024, 0, height);
         }
 
-        // botones
-        const aState = toBool(values[2]);
-        const bState = toBool(values[3]);
-
-        if (aState && !lastA) {
-          microbitClick();               // A = click (nueva forma)
+        // botones (sin flancos, directo)
+        if (values[2] === "True") {
+          microbitClick();
         }
-        if (bState && !lastB) {
-          drawMode = (drawMode === 1) ? 2 : 1;  // B = alternar modo
+        if (values[3] === "True") {
+          drawMode = (drawMode === 1) ? 2 : 1;
         }
-
-        lastA = aState;
-        lastB = bState;
       }
     }
   }
 
-  // interpolación (porque se veia muy lageado)
+  // suavizar movimiento
   centerX = lerp(centerX, targetX, 0.2);
   centerY = lerp(centerY, targetY, 0.2);
 
@@ -297,7 +274,6 @@ function draw() {
   noFill();
 
   if (drawMode === 1) {
-    // círculo
     beginShape();
     curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
     for (let i = 0; i < formResolution; i++) {
@@ -307,7 +283,6 @@ function draw() {
     curveVertex(x[1] + centerX, y[1] + centerY);
     endShape();
   } else {
-    // línea
     beginShape();
     curveVertex(x[0] + centerX, y[0] + centerY);
     for (let i = 0; i < formResolution; i++) {
@@ -348,6 +323,7 @@ function connectBtnClick() {
     port.close();
   }
 }
+
 ```
 INDEX
 ``` js
@@ -387,6 +363,7 @@ INDEX
 ## Video
 
 [Video demostratativo](https://youtu.be/cXPEfryDrNU)
+
 
 
 
