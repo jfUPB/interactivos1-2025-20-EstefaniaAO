@@ -250,7 +250,7 @@ function draw() {
           targetY = map(yValue, -1024, 1024, 0, height);
         }
 
-        // botones (sin flancos, directo)
+        // botones 
         if (values[2] === "True") {
           microbitClick();
         }
@@ -363,6 +363,7 @@ INDEX
 ## Video
 
 [Video demostratativo](https://youtu.be/cXPEfryDrNU)
+
 
 
 
