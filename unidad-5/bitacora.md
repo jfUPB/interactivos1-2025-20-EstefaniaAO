@@ -6,27 +6,34 @@
 
 #### Describe cómo se están comunicando el micro:bit y el sketch de p5.js. ¿Qué datos envía el micro:bit?
 
+El micro:bit y el sketch en p5.js se comunican mediante un puerto serial (UART). El micro:bit toma los valores del acelerómetro (`xValue`, `yValue`) y el estado de los botones (`aState`,` bState`), y los envía en una sola línea de texto en formato ASCII separados por comas:
+
 ``` py
 data = "{},{},{},{}\n".format(xValue, yValue, aState,bState)
 ```
 
 #### ¿Cómo es la estructura del protocolo ASCII usado?
 
+Los cuatro valores se mandan como texto ASCII, separados por comas. Cada línea de datos termina con un salto de línea (\n).
+Usando la App de conexión serial es algo como esto:
 
+`-36,228,True,False\n`
 
 #### Muestra y explica la parte del código de p5.js donde lee los datos del micro:bit y los transforma en coordenadas de la pantalla.
+
+En p5.js se leen los datos del puerto serial con `port.readUntil("\n")`. Luego se dividen en una lista de valores y se transforman en enteros o booleanos, dependiendo de si es `xValue`/`yvalue` o `aState`/`bState` respectivamente. Los valores de X y Y se ajustan para ubicarlos en el centro de la pantalla `(+ windowWidth/2, + windowHeight/2)`.
 
 ``` js
     if (port.availableBytes() > 0) {
       let data = port.readUntil("\n");
       if (data) {
         data = data.trim();
-        let values = data.split(",");
+        let values = data.split(","); // acá se separan los datos recibidos en cada coma
         if (values.length == 4) {
-          microBitX = int(values[0]) + windowWidth / 2;
-          microBitY = int(values[1]) + windowHeight / 2;
-          microBitAState = values[2].toLowerCase() === "true";
-          microBitBState = values[3].toLowerCase() === "true";
+          microBitX = int(values[0]) + windowWidth / 2; // primer valor es xValue
+          microBitY = int(values[1]) + windowHeight / 2; // segundo es yValue
+          microBitAState = values[2].toLowerCase() === "true"; // acá se compara el aState a ver si es true
+          microBitBState = values[3].toLowerCase() === "true"; // acá el bState
           updateButtonStates(microBitAState, microBitBState);
         } else {
           print("No se están recibiendo 4 datos del micro:bit");
@@ -88,3 +95,4 @@ En p5.js:
 <img width="1080" height="400" alt="Diseño sin título (2)" src="https://github.com/user-attachments/assets/0dce8ffc-7f9e-41b2-a9f7-ce0d9d7cdc05" />
 
 <img width="1080" height="400" alt="Diseño sin título (3)" src="https://github.com/user-attachments/assets/9bc4615c-93cc-40f8-b32b-088dcfb93e06" />
+
