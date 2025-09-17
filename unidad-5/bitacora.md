@@ -996,4 +996,7 @@ Voy a enfocarme en cambiar esta parte del código
   }
 ```
 
-Por lo que veo en la actividad 03 toda esa parte del código básicamente se va y mejor para aplicar el framing.
+Por lo que veo en la actividad 03 toda esa parte del código básicamente se va para aplicar el framing.
+Me doy cuenta de que voy a tener que cambiar más cosas en el código que en la actividad porque yo llamo directamente a la función a la hora de leer los datos. Ahora me toca aplicarlo de forma distinta al borrar todo el `draw()`.
+
+```js
