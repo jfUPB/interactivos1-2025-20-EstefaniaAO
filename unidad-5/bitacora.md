@@ -102,6 +102,8 @@ En p5.js:
 
 ### Captura el resultado del experimento anterior. ¿Por qué se ve este resultado?
 
+Se ve así porque los datos ya no se están enviando como texto (ASCII), sino en formato binario. Al mostrarlos como si fueran texto, la aplicación intenta interpretar cada byte como un carácter imprimible, pero muchos de esos bytes no corresponden a caracteres válidos. Por eso aparecen cuadros negros, símbolos raros o letras sin sentido.
+
 <img width="1005" height="285" alt="image" src="https://github.com/user-attachments/assets/68d55670-7a33-488b-b468-337b3637cf85" />
 
 
@@ -112,10 +114,26 @@ En p5.js:
 data = struct.pack('>2h2B', xValue, yValue, int(aState), int(bState))
 ```
 
+Lo que se ve en HEX es exactamente la representación binaria de esos valores que se están empaquetando con struct.pack. El formato >2h2B significa: dos enteros cortos (xValue y yValue) y dos enteros sin signo (aState y bState).
+Por eso en modo texto era ilegible, pero en modo HEX se puede ver byte por byte cómo se están transmitiendo esos datos de manera compacta.
+
 <img width="1025" height="306" alt="image" src="https://github.com/user-attachments/assets/24d53308-52bf-4ff4-9ff2-59c65b084f9e" />
 
 
 ### ¿Qué ventajas y desventajas ves en usar un formato binario en lugar de texto en ASCII?
+
+Investigando más:
+Ventajas:
+
+- Ocupa menos espacio y es más eficiente al transmitir.
+- Permite enviar datos numéricos directamente sin convertirlos a cadenas.
+- La comunicación es más rápida y precisa porque no hay caracteres adicionales como comas o saltos de línea.
+- Es un mnúmero fijo de bytes entonces no tiene que leer hasta cierto punto si no que se sabe que datos son que bytes.
+
+Desventajas:
+
+- No es legible (menos que el ASCII al menos), se ve como símbolos raros. Por lo tanto es más dificil de analizar y entender a simple vista.
+- Emisor y receptor tienen que estar como iguales en el formato exacto de empaquetado (orden de bytes, tamaño de cada dato, etc.), tener muy claro que dato lleva a que y de que tamaño es, cosas así.
 
 #### Cambiamos el código del micro:bit a:
 ```py
@@ -137,6 +155,20 @@ while True:
 
 ### Captura el resultado del experimento. ¿Cuántos bytes se están enviando por mensaje? ¿Cómo se relaciona esto con el formato '>2h2B'? ¿Qué significa cada uno de los bytes que se envían?
 
+Cada mensaje tiene 6 bytes en total. Esto se debe al formato '>2h2B':
+
+2h: dos enteros cortos con signo (xValue y yValue), cada uno ocupa 2 bytes entonces 4 bytes en total.
+2B: dos enteros sin signo de 1 byte cada uno (aState y bState) entonces 2 bytes en total.
+
+En resumen: 2h2B = 2*2 + 2*1 = 6 bytes.
+
+Significado de los bytes:
+
+- Bytes 1 y 2:  xValue
+- Bytes 3 y 4:  yValue.
+- Byte 5:  estado de aState (0 si no está presionado, 1 si está presionado).
+- Byte 6:  estado de bState (0 si no está presionado, 1 si está presionado).
+
 <img width="1003" height="296" alt="image" src="https://github.com/user-attachments/assets/9e92b9f0-5033-4d09-b046-8d01e2102638" />
 
 *Al agitarlo una sola vez.*
@@ -147,6 +179,22 @@ while True:
 
 
 ### Recuerda de la unidad anterior que es posible enviar números positivos y negativos para los valores de xValue y yValue. ¿Cómo se verían esos números en el formato '>2h2B'?
+
+Mirando los valores cuando lo agito a la derecha o a la izquierda:
+
+Como los dos primeros campos son enteros con signo: Los primeros dos numeritos son el signo y los otros dos el valor como tal, viendo en hex:
+
+xValue = 100 en hex sería 00 64. 
+
+Un número negativo se representa con dos f. Ejemplo:
+
+xValue = -100  en hex sería ff 9C. 
+
+(Las traducciones de los números como tal las busqué en internet y con)
+
+<img width="800" height="448" alt="image" src="https://github.com/user-attachments/assets/05554fe0-02b8-4fb8-ae9a-373648626047" />
+
+Entonces si muevo el micro:bit hacia la derecha entonces es un valor positivo en xValue, los primeros dos bytes son algo como 00 xx. Si lo muevo hacia la izquierda, el valor es negativo, los dos bytes son algo como ff xx.
 
 >Ahora realiza el siguiente experimento para comparar el envío de datos en ASCII y en binario.
 
@@ -171,6 +219,40 @@ while True:
 ```
 
 ### Captura el resultado del experimento. ¿Qué diferencias ves entre los datos en ASCII y en binario? ¿Qué ventajas y desventajas ves en usar un formato binario en lugar de texto en ASCII? ¿Qué ventajas y desventajas ves en usar un formato ASCII en lugar de binario?
+
+En ASCII los datos me aparecen escritos de una forma que entiendo más fácil, como con números separados por comas y hasta True/False para los botones. Es como más directo de leer.
+
+En binario en cambio se ve en hex, lleno de números que no entiendo a simple vista. Ahí ya no sé qué significa cada cosa si no lo analizo bien, aunque sé que es más compacto.
+
+
+---
+
+Ventajas del binario:
+
+- Los mensajes ocupan menos espacio.
+- Se mandan más rápido.
+- El código o como la computadora no tiene que convertir los datos, ya van directos.
+
+Desventajas del binario:
+
+- Es más difícil de leer, se ve como raro ya que el 100 positivo es algo y el negativo es otro, no es tan intuitivo como el ASCII para saberselo de memoria.
+- Para entender en el lector de seriales que pasa y depurar no ayuda mucho porque no sé qué significa cada byte sin hacer cálculos o buscar.
+
+---
+
+Ventajas del ASCII:
+
+- Es mucho más fácil de leer, aprender y entender.
+- Apenas conecto el monitor serial ya veo los valores de una.
+- No me tengo que preocupar por interpretar bytes.
+- Quizá también más facil para entender en un principio, ya que es claro que se separan por comas y que valor es cada cosa
+
+Desventajas del ASCII:
+
+- Ocupa más espacio porque cada número se manda como varios caracteres.
+- Es un poquito más lento.
+- Si quiero procesar los datos, toca volver a convertirlos a número.
+
 
 <img width="997" height="285" alt="image" src="https://github.com/user-attachments/assets/7d05d185-4671-4a28-9b34-aaa06b28a5c4" />
 
@@ -211,9 +293,13 @@ while True:
 
 ### Explica por qué en la unidad anterior teníamos que enviar la información delimitada y además marcada con un salto de línea y ahora no es necesario.
 
+Antes, como los datos se mandaban en texto (ASCII), tocaba poner comas para separar cada valor y al final un salto de línea para saber dónde terminaba un mensaje y empezaba el otro. Si no, todo quedaba pegado y no había manera de distinguir qué valor era cuál.
+
+Ahora ya no es necesario porque los datos se mandan en binario, y yo ya sé de antemano que cada mensaje ocupa exactamente 6 bytes (2 para x, 2 para y y 1 para cada botón). Entonces no tengo que usar comas ni saltos de línea, porque simplemente sé que cada movimiento del microbit se lee de 6 en 6 y listo.
+
 ### Compara el código de la unidad anterior relacionado con la recepción de los datos seriales que ves ahora. ¿Qué cambios observas?
 
-Unidad anterior:
+Unidad actual:
 ```js
 if (port.availableBytes() >= 6) {
     let data = port.readBytes(6);
@@ -239,7 +325,11 @@ if (port.availableBytes() >= 6) {
 }
 ```
 
-Actual:
+- Se revisa si hay al menos 6 bytes disponibles y se leen directo con readBytes(6).
+- Después se interpretan con un DataView, sacando los enteros de 16 bits y los bytes según la posición.
+- Ya no hay comas, ni saltos de línea, ni texto que convertir: los datos vienen listos en binario.
+
+Anterior:
 ```js
     if (port.availableBytes() > 0) {
       let data = port.readUntil("\n");
@@ -256,6 +346,12 @@ Actual:
           print("No se están recibiendo 4 datos del micro:bit");
         }
 ```
+
+- Se usaba readUntil("\n") para leer hasta el salto de línea.
+- Luego tocaba hacer split(",") para separar los datos por comas.
+- También había que convertir los valores de texto ("true", "false", números en string) a valores lógicos o enteros.
+
+
 
 > Ahora te voy a pedir que ejecutes el código de p5.js muchas veces y que estés muy atento a la consola. Lo que haremos es a tratar de reproducir un error que tiene este código. El error es de sincronización y se produce cuando los 6 bytes que lee el código de p5.js no corresponden a los mismos 6 bytes que envía el micro:bit.
 
@@ -283,6 +379,11 @@ Quinta
 
 <img width="750" height="210" alt="image" src="https://github.com/user-attachments/assets/cf748237-e18f-426c-9257-c387e54de47c" />
 
+Lo hice muchas veces porque no entendía que pasaba hasta que vi bien y pues tengo una idea general.
+
+En la primera ejecución se ven los valores de x y y normales (500 y 524) y los estados de los botones correctos pero luego aparecen valores raros como -3070 o 3073, que no tienen sentido para el acelerómetro e igual se esta mandando un numero cosntante.
+
+Yo creo que esto se debe a un error de sincronización, el programa de p5.js está leyendo los datos en bloques de 6 bytes, pero a veces no empieza justo en el primer byte del mensaje sino que se “corre” un poco y termina interpretando mal los valores. Es decir, en vez de leer xValue desde donde debería, arranca en medio del dato o se salta un byte, y eso hace que aparezcan números extraños.
 
 > En el caso del micro:bit se enviará un paquete de 8 bytes:
 ```
@@ -933,10 +1034,26 @@ function keyReleased() {
 
 <img width="1734" height="836" alt="image" src="https://github.com/user-attachments/assets/e8c4ac5a-4450-490d-8319-9cc1b499455e" />
 
+En la consola ya no se ven esos errores de sincronización. Antes, cuando p5.js agarraba mal los 6 bytes, los valores se desfasaban y aparecían números absurdos.
+
+- El programa del micro:bit ahora ya no manda los datos como texto separado por comas y saltos de línea, sino como un paquete binario estructurado.
+- Incluye un header fijo (0xAA) que sirve de marca para saber dónde empieza el paquete.
+- Empaqueta las lecturas de los ejes y botones en binario (struct.pack), ocupando menos espacio y siendo más rápido de transmitir.
+- Agrega un checksum, que es como un número de control: suma los bytes y permite detectar si el paquete llegó mal o incompleto.
+
+en p5.js
+
+- Ya no lee líneas de texto, ahora junta los bytes que van llegando en un buffer.
+- Busca el header 0xAA y sólo procesa un paquete cuando está completo.
+- Revisa el checksum: si no coincide, descarta ese paquete.
+- Al tener esta estructura, se evitan los desajustes raros que antes hacían que aparecieran números locos como -3070.
+
 Apply
 ---
 
 ## Actividad 04
+
+https://editor.p5js.org/estefaao2006/full/nT4KmnlU1
 
 ```py
 from microbit import *
@@ -996,7 +1113,278 @@ Voy a enfocarme en cambiar esta parte del código
   }
 ```
 
+Antes usaba esta lógica con readUntil("\n") para leer ASCII:
+
+```
+ if (port.available() > 0) {
+    let data = port.readUntil("\n");
+    if (data && data.length > 0) {
+      let values = data.trim().split(",");
+      ...
+    }
+ }
+```
+
+Eso ya no sirve porque ahora no hay comas ni saltos de línea, todo viene en binario.
+
 Por lo que veo en la actividad 03 toda esa parte del código básicamente se va para aplicar el framing.
 Me doy cuenta de que voy a tener que cambiar más cosas en el código que en la actividad porque yo llamo directamente a la función a la hora de leer los datos. Ahora me toca aplicarlo de forma distinta al borrar todo el `draw()`.
 
+Después de borrar la parte que leía los datos con readUntil("\n"), paso a implementar el framing.
+
+Primero cambio el draw() para que sea el encargado de ir leyendo byte por byte y guardarlos en el buffer que había declarado antes.
+
 ```js
+function draw() {
+while (port.available() > 0) {
+const byte = port.read();
+serialBuffer.push(byte);
+```
+
+Con esto los bytes se van acumulando. Pero como puede entrar cualquier cosa, necesito asegurarme de que el primer byte siempre sea el que marca el inicio del paquete. En este caso, el paquete empieza con 0xAA. Entonces agrego una verificación para limpiar los que no sirvan:
+
+```js
+if (serialBuffer[0] !== 0xAA) {
+serialBuffer.shift();
+continue;
+}
+```
+
+Ya con eso me aseguro de que los datos que quedan en el buffer son parte de un paquete bueno.
+
+Ahora, cada paquete tiene un tamaño fijo. Entonces, cuando el buffer ya tiene suficientes bytes (8 en este caso),  reviso de una
+
+```js
+if (serialBuffer.length >= 8) {
+const payload = serialBuffer.slice(1, 7);
+const checksum = serialBuffer[7];
+const sumCheck = payload.reduce((a, b) => a + b, 0) % 256;
+```
+esto guiandome en el código de la act. 3
+```js
+if (checksum === sumCheck) {
+```
+
+Si todo coincide, entonces ahora sí puedo interpretar los datos. Para eso DataView, que lee directamente los valores que había empaquetado en el micro:bit.
+
+```js
+const dataView = new DataView(new Uint8Array(payload).buffer);
+const xValue = dataView.getInt16(0);
+const yValue = dataView.getInt16(2);
+const aState = dataView.getUint8(4);
+const bState = dataView.getUint8(5);
+```
+
+Un pequeño arreglo otra vez al código de coordenadas 
+
+```js
+targetX = map(xValue, -1024, 1024, 0, width);
+targetY = map(yValue, -1024, 1024, 0, height);
+```
+
+Y manejo las acciones de los botones igual que antes, pero ahora usando los valores que recibo en binario:
+
+```js
+if (aState === 1) {
+microbitClick();
+}
+if (bState === 1) {
+drawMode = (drawMode === 1) ? 2 : 1;
+}
+}
+```
+
+```js
+serialBuffer = [];
+}
+}
+}
+```
+
+Por organizar lo pongo en una funcion aparte y no en el draw.
+Antes, toda la lectura se hacía dentro de draw().
+Ahora, como tengo una función que procesa los datos binarios, simplemente llamo a readSerialData()
+
+Y inalmente, dentro de draw() en lugar de tener todo el bloque donde leía con readUntil("\n"), ahora simplemente llamo:
+```
+
+readSerialData();
+```
+
+Código final:
+
+```js
+'use strict';
+let formResolution = 15;
+let stepSize = 2;
+let initRadius = 150;
+let centerX, centerY;
+let x = [];
+let y = [];
+let drawMode = 1;
+
+let port, connectBtn, connectionInitialized = false;
+
+// posición suavizada
+let targetX, targetY;
+
+// buffer para datos binarios
+let serialBuffer = [];
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+
+  // centro inicial
+  centerX = width / 2;
+  centerY = height / 2;
+  targetX = centerX;
+  targetY = centerY;
+
+  let angle = radians(360 / formResolution);
+  for (let i = 0; i < formResolution; i++) {
+    x.push(cos(angle * i) * initRadius);
+    y.push(sin(angle * i) * initRadius);
+  }
+
+  stroke(0, 50);
+  strokeWeight(0.75);
+  background(255);
+
+  // micro:bit
+  port = createSerial();
+  connectBtn = createButton("Connect to micro:bit");
+  connectBtn.position(80, 80);
+  connectBtn.mousePressed(connectBtnClick);
+}
+
+function draw() {
+  if (!port.opened()) {
+    connectBtn.html("Connect to micro:bit");
+    return;
+  }
+  connectBtn.html("Disconnect");
+
+  if (port.opened() && !connectionInitialized) {
+    port.clear();
+    connectionInitialized = true;
+  }
+
+  // leer datos del puerto en binario
+  readSerialData();
+
+  // suavizar movimiento con interpolación
+  centerX = lerp(centerX, targetX, 0.2);
+  centerY = lerp(centerY, targetY, 0.2);
+
+  // mover puntos
+  for (let i = 0; i < formResolution; i++) {
+    x[i] += random(-stepSize, stepSize);
+    y[i] += random(-stepSize, stepSize);
+  }
+
+  noFill();
+
+  if (drawMode === 1) {
+    beginShape();
+    curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
+    for (let i = 0; i < formResolution; i++) {
+      curveVertex(x[i] + centerX, y[i] + centerY);
+    }
+    curveVertex(x[0] + centerX, y[0] + centerY);
+    curveVertex(x[1] + centerX, y[1] + centerY);
+    endShape();
+  } else {
+    beginShape();
+    curveVertex(x[0] + centerX, y[0] + centerY);
+    for (let i = 0; i < formResolution; i++) {
+      curveVertex(x[i] + centerX, y[i] + centerY);
+    }
+    curveVertex(x[formResolution - 1] + centerX, y[formResolution - 1] + centerY);
+    endShape();
+  }
+}
+
+function readSerialData() {
+  let available = port.availableBytes();
+  if (available > 0) {
+    let newData = port.readBytes(available);
+    serialBuffer = serialBuffer.concat(newData);
+  }
+
+  // paquete = 1 header + 2*2 bytes + 2 botones + 1 checksum = 8 bytes
+  while (serialBuffer.length >= 8) {
+    if (serialBuffer[0] !== 0xaa) {
+      serialBuffer.shift();
+      continue;
+    }
+    if (serialBuffer.length < 8) break;
+
+    let packet = serialBuffer.slice(0, 8);
+    serialBuffer.splice(0, 8);
+
+    let dataBytes = packet.slice(1, 7);
+    let receivedChecksum = packet[7];
+    let computedChecksum = dataBytes.reduce((acc, val) => acc + val, 0) % 256;
+
+    if (computedChecksum !== receivedChecksum) {
+      console.log("Checksum error");
+      continue;
+    }
+
+    let buffer = new Uint8Array(dataBytes).buffer;
+    let view = new DataView(buffer);
+
+    const xValue = view.getInt16(0);
+    const yValue = view.getInt16(2);
+    const aState = view.getUint8(4) === 1;
+    const bState = view.getUint8(5) === 1;
+
+    if (!Number.isNaN(xValue)) {
+      targetX = map(xValue, -1024, 1024, 0, width);
+    }
+    if (!Number.isNaN(yValue)) {
+      targetY = map(yValue, -1024, 1024, 0, height);
+    }
+
+    if (aState) {
+      microbitClick();
+    }
+    if (bState) {
+      drawMode = (drawMode === 1) ? 2 : 1;
+    }
+  }
+}
+
+function microbitClick() {
+  if (drawMode === 1) {
+    let angle = radians(360 / formResolution);
+    let radius = initRadius * random(0.5, 1);
+    for (let i = 0; i < formResolution; i++) {
+      x[i] = cos(angle * i) * radius;
+      y[i] = sin(angle * i) * radius;
+    }
+  } else {
+    let radiusL = initRadius * random(0.5, 5);
+    let angleL = random(PI);
+    let x1 = cos(angleL) * radiusL;
+    let y1 = sin(angleL) * radiusL;
+    let x2 = cos(angleL - PI) * radiusL;
+    let y2 = sin(angleL - PI) * radiusL;
+    for (let i = 0; i < formResolution; i++) {
+      x[i] = lerp(x1, x2, i / formResolution);
+      y[i] = lerp(y1, y2, i / formResolution);
+    }
+  }
+}
+
+function connectBtnClick() {
+  if (!port.opened()) {
+    port.open("MicroPython", 115200);
+    connectionInitialized = false;
+  } else {
+    port.close();
+  }
+}
+
+```
+
