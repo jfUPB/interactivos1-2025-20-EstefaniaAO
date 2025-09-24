@@ -41,7 +41,11 @@ A user connected - ID: Plrrg6VfuV2qrAtRAAAD
 
 <img width="1920" height="1030" alt="image" src="https://github.com/user-attachments/assets/2c59a11c-404d-4b08-98e9-47cbd2cf5577" />
 
+#### 
+
 Al mover una de las ventanas, se manda un mensaje a la otra para que la linea siga unida sin importar a donde se mueva o si se cambia el tamaño del canvas, dando la idea de que están siemore conectadas.
+
+#### 
 
 <p align="center">
 <img width="500" height="270" alt="image" src="https://github.com/user-attachments/assets/80fab357-0b03-4c4e-a81d-43539d8d77a9" />
@@ -63,4 +67,5 @@ Sync status: pages=true, synced=false, clients=2
 Debug - Connected clients: 2, Page1: 1, Page2: 1, Synced: 2
 All clients are fully synced
 ~~~
+
 
