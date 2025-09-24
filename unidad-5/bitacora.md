@@ -1400,25 +1400,43 @@ Porque respondí, hice todos los experimentos y las cosas conscientemente. Todo 
 
 1. Profundidad de la Indagación: 5
 
-Aunque las preguntas iniciales no fueron planteadas por mí, me dediqué a explorarlas con detalle y a responderlas de manera reflexiva. Por ejemplo, al analizar en qué escenarios un protocolo ASCII podría ser preferible a uno binario, no me limité a dar una respuesta rápida, sino que profundicé en las ventajas relacionadas con su legibilidad y facilidad de depuración. Como se muestra en la [actividad 1](#act1), esta exploración me permitió comprender cómo las decisiones de diseño en los protocolos de comunicación tienen implicaciones prácticas en el flujo de datos.  
+Aunque las preguntas iniciales no fueron planteadas por mí, me dediqué a explorarlas con detalle y a responderlas de manera reflexiva. Por ejemplo, al analizar en qué escenarios un protocolo ASCII podría ser preferible a uno binario, no me limité a dar una respuesta rápida, sino que profundicé en las ventajas relacionadas con su legibilidad y facilidad de depuración. Como se muestra en la [actividad 2](#act2),
 
-También reflexioné sobre la importancia de las estrategias de framing y su relación con la organización de la información transmitida. Aunque no formulé las preguntas por cuenta propia, aproveché las que me fueron planteadas para profundizar en los temas y relacionarlos con contextos de uso reales. Como se ve en la [actividad 2](#act2), al responderlas logré fortalecer mi curiosidad sobre los principios de comunicación de datos, lo que justifica que me ubique en el nivel más alto de este criterio.
+
+>"En ASCII los datos me aparecen escritos de una forma que entiendo más fácil, como con números separados por comas y hasta True/False para los botones. Es como más directo de leer.
+>
+>En binario en cambio se ve en hex, lleno de números que no entiendo a simple vista. Ahí ya no sé qué significa cada cosa si no lo analizo bien, aunque sé que es más compacto.
+>
+>Ventajas:
+>...
+>Desventajas:
+>..."
+
+esta exploración me permitió comprender cómo las decisiones de diseño en los protocolos de comunicación tienen implicaciones prácticas en el flujo de datos.  
+
+También reflexioné sobre la importancia de las estrategias de framing y su relación con la organización de la información transmitida. Aunque no formulé las preguntas por cuenta propia, aproveché las que me fueron planteadas para profundizar en los temas y relacionarlos con contextos de uso reales. Como se ve en la [actividad 2](#act2) y [actividad 3](#act3), al responderlas logré fortalecer mi curiosidad sobre los principios de comunicación de datos, lo que justifica que me ubique en el nivel más alto de este criterio.
 
 2. Calidad de la Experimentación: 5
 
-En mis experimentos busqué no solo comprobar que el sistema funcionara, sino también aislar problemas específicos y comprender sus causas. Realicé pruebas para observar cómo se estructuraban los datos en ASCII y cómo se comportaba la comunicación cuando variaba la información enviada. Como se muestra en la [actividad 2](#act2), este proceso me permitió identificar la relevancia del formato y comprobar la necesidad de un framing que evitara errores de interpretación.  
+En mis experimentos busqué no solo comprobar que el sistema funcionara, sino también aislar problemas específicos y comprender sus causas. Realicé pruebas para observar cómo se estructuraban los datos en ASCII y cómo se comportaba la comunicación cuando variaba la información enviada. Como se muestra en la [actividad 2](#act2) cuando capturé distintos resultados al probar los formatos, este proceso me permitió identificar la relevancia del formato y en la [actividad 3](#act3) al hacer varios intentos del mismo experimento para comprobar la necesidad de un framing que evitara errores de interpretación.  
+
+>"Lo hice muchas veces porque no entendía que pasaba hasta que vi bien y pues tengo una idea general.
+>
+>En la primera ejecución se ven los valores de x y y normales (500 y 524) y los estados de los botones correctos pero luego aparecen valores raros como -3070 o 3073, que no tienen sentido para el acelerómetro e igual se esta mandando un numero cosntante.
+>
+>Yo creo que esto se debe a un error de sincronización, el programa de p5.js está leyendo los datos en bloques de 6 bytes, pero a veces no empieza justo en el primer byte del mensaje sino que se “corre” un poco y termina interpretando mal los valores. Es decir, en vez de leer xValue desde donde debería, arranca en medio del dato o se salta un byte, y eso hace que aparezcan números extraños."
 
 Además, intenté diseñar escenarios de prueba más exigentes de lo que se pedía inicialmente, con el fin de evaluar la robustez del sistema. En la [actividad 3](#act3) y [actividad 4](#act4), por ejemplo, logré reproducir situaciones en las que aparecían inconsistencias, lo que me permitió comprobar de forma consistente cómo las soluciones propuestas resolvían los problemas. De esta manera, mi experimentación no se limitó a verificar resultados, sino entender como funcionan y verdaderamente entender los términos.  
 
 3. Análisis y Reflexión: 5
 
-En mi bitácora no me limité a verificar que las soluciones funcionaran, sino que reflexioné sobre sus implicaciones y limitaciones. Por ejemplo, al comparar el uso de ASCII con el binario, analicé el trade-off entre eficiencia de transmisión y facilidad de lectura. Como se muestra en la [actividad 3](#act3), este análisis me permitió entender que cada decisión técnica trae ventajas y desventajas que deben considerarse dependiendo del contexto de uso.  
+En mi bitácora no me limité a verificar que las soluciones funcionaran, sino que reflexioné sobre sus implicaciones y limitaciones. Por ejemplo, al comparar el uso de ASCII con el binario, analicé cosas entre eficiencia de transmisión y facilidad de lectura. Como se muestra en la [actividad 3](#act3), este análisis me permitió entender que cada decisión técnica trae ventajas y desventajas que deben considerarse dependiendo del contexto de uso.  
 
- En la [actividad 3](#act3) y [actividad 4](#act4) (aplicación), por ejemplo, reflexioné sobre la importancia de mantener protocolos simples pero claros, lo que me permitió ver cómo cada paso en la transmisión tiene un efecto directo en la fiabilidad de la comunicación.  
+En la [actividad 3](#act3) y [actividad 4](#act4) (aplicación), por ejemplo, aprendí y pude implementar conceptos aprendidos y entender de una forma mucho mas correcta como mejorar la comunicación entre el p5.js con el micro:bit, entendiendo que aunque algo funcione puede no ser la opción más óptima o tener errores que no puedo aprender a simple vista, lo que me permitió ver cómo cada paso en la transmisión tiene un efecto directo en la fiabilidad de la comunicación.  
 
 4. Apropiación y Articulación de Conceptos: 5
 
-Durante el desarrollo de las actividades logré apropiarme de los conceptos y explicarlos con mis propias palabras, relacionándolos como un sistema interdependiente. No me limité a describir qué es la comunicación serial, sino que expliqué cómo el flujo de bytes asíncronos requiere de protocolos y framing para convertirse en un intercambio confiable. Como se ve en la [actividad 1](#act1), [actividad 2](#act2) y [actividad 3](#act3), conseguí expresar con claridad esta relación y mostrar cómo los elementos técnicos se complementan.  
+Durante el desarrollo de las actividades logré apropiarme de los conceptos y explicarlos con mis propias palabras, relacionándolos como un sistema interdependiente. No me limité a describir qué es la comunicación serial, sino que leí y escribi mi entendimiento protocolos y framing. Como se ve en la [actividad 1](#act1), [actividad 2](#act2) y [actividad 3](#act3), conseguí expresar con claridad diferentes conceptos y el funcionamiento de los programas, así como experimentar e intentar entender como funcionan los bytes hasta que tuve una claridad del tema.  
 
 También utilicé ejemplos y analogías para explicar los conceptos de una manera más accesible, lo que demuestra que no me limité a memorizar definiciones, sino que los reelaboré en mi propio lenguaje. En la [actividad 4](#act4), esto se refleja en cómo logré articular la importancia de imponer reglas sobre el “caos” de los datos, mostrando así un dominio conceptual sólido y justificando mi ubicación en el nivel más alto de este criterio.  
 
@@ -1487,4 +1505,5 @@ let view = new DataView(buffer);
     microBitY = view.getInt16(2) + windowHeight / 2;
     microBitAState = view.getUint8(4) === 1;
     microBitBState = view.getUint8(5) === 1;
+
 
