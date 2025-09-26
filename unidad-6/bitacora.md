@@ -68,4 +68,6 @@ Debug - Connected clients: 2, Page1: 1, Page2: 1, Synced: 2
 All clients are fully synced
 ~~~
 
+## Actividad 02:
 
+> Piensa en cómo te conectas a Internet en casa o en la Universidad. ¿Usas Wi-Fi? ¿Un cable de red? Eso es simplemente tu “rampa de acceso” a la gran red de carreteras. ¿Qué pasaría si esa rampa se corta? Anota tus ideas.
