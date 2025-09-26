@@ -71,3 +71,5 @@ All clients are fully synced
 ## Actividad 02:
 
 > Piensa en cómo te conectas a Internet en casa o en la Universidad. ¿Usas Wi-Fi? ¿Un cable de red? Eso es simplemente tu “rampa de acceso” a la gran red de carreteras. ¿Qué pasaría si esa rampa se corta? Anota tus ideas.
+
+Mi dispositivo móvil lo conecto a el internet directamente o con un amplificador de señal inalambrico en otro punto del apartamento. En el PC uso un cable de red. Asumo que si esa rampa de acceso se corta, es como si se dañara un puente entre los dos puntos. Puede que yo siga enviando señales sin embargo si la rampa de acceso no funciona entonces el receptor jamás va a poder leerlas o dar una retroalimentación.
