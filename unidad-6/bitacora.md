@@ -101,9 +101,25 @@ Mi dispositivo móvil lo conecto a el internet directamente o con un amplificado
 > - */pagina/index.html*
 > La ruta específica dentro de ese servidor. Es como pedir ir a la “sección de arte, Estante 3, Libro 5” dentro de la biblioteca. Indica el recurso exacto que quieres.
 
-### Toma la URL de tu sitio web favorito. Intenta identificar el protocolo, el nombre de dominio y la ruta (si la hay). ¿Qué crees que pasa si solo escribes el nombre de dominio (ej. www.google.com) sin una ruta específica? ¿Qué “página por defecto” crees que te envía el servidor?
+### Toma la URL de tu sitio web favorito. Intenta identificar el protocolo, el nombre de dominio y la ruta (si la hay).
 
-s
+#### https://neal.fun/infinite-craft/
+
+*Protocolo:* https://
+*Nombre de dominio:* neal.fun
+*Ruta:* /infinite-craft/
+
+### ¿Qué crees que pasa si solo escribes el nombre de dominio (ej. www.google.com) sin una ruta específica?
+
+Me manda al directorio de juegos de neal.fun, es la ruta la que me dirige al juego en particular.
+
+<p align="center">
+<img width="1919" height="1027" alt="image" src="https://github.com/user-attachments/assets/e1a73487-1166-4798-a133-32b8728df0c4" />
+</p>
+
+### ¿Qué “página por defecto” crees que te envía el servidor?
+
+
 
 ---
 
@@ -126,3 +142,4 @@ l
 ### ¿Por qué crees que HTTP necesita ser más complejo que un simple envío de bytes como hacías con el micro:bit?
 
 l
+
