@@ -143,3 +143,110 @@ l
 
 l
 
+
+## Actividad 03:
+
+
+
+## Actividad 04:
+
+--- 
+### Experimento 01:
+
+> Abre page2.html en tu navegador (con el servidor corriendo).
+> Abre la consola de desarrollador (F12).
+> Detén el servidor Node.js (Ctrl+C).
+
+#### Refresca la página page2.html. Observa la consola del navegador. ¿Ves algún error relacionado con la conexión? ¿Qué indica?
+
+w
+
+#### Vuelve a iniciar el servidor y refresca la página. ¿Desaparecen los errores?
+
+d
+
+---
+### Experimento 02:
+
+> Comenta la línea socket.emit(‘win2update’, currentPageData, socket.id); dentro del listener connect.
+> Reinicia el servidor y refresca page1.html y page2.html.
+> Mueve la ventana de page2 un poco para que envíe una actualización.
+
+#### ¿Qué pasó? ¿Por qué?
+
+d
+
+---
+### Experimento 03: 
+
+> Asegúrate de tener este console.log en page2.js.
+> Abre ambas páginas.
+
+#### Mueve la ventana de page1. Observa la consola del navegador de page2. ¿Qué datos muestra?
+
+w
+
+#### Mueve la ventana de page2. Observa la consola de page1. ¿Qué pasa? ¿Por qué?
+
+d
+
+---
+### Experimento 04:
+
+> Observa checkWindowPosition() en page2.js y modifica el código del if para comprobar si el código dentreo de este se ejecuta.
+> Mueve cada ventana y observa las consolas.
+
+#### ¿Qué puedes concluir y por qué?
+
+d
+
+---
+### Experimento 05:
+
+> Sé creativo.
+
+#### Cambia el background(220) para que dependa de la distancia entre las ventanas. Puedes calcular la magnitud del resultingVector usando let distancia = resultingVector.mag(); y luego usa map() para convertir esa distancia a un valor de gris o color. background(map(distancia, 0, 1000, 255, 0)); (ajusta el rango 0-1000 según sea necesario).
+
+wa
+
+#### Inventa otra:
+
+## Actividad 05:
+
+### Explica tu idea y realiza algunos bocetos.
+
+Mi idea es modificar la aplicación volviendo los circulos una princesa y un sapo. Básicamente mi idea es que al estar las páginas alineadas especificamente para que los labios de la princesa y el sapo se encuentren entonces el sapo se transforma en un príncipe, y si se vuelven a alejar cierta distancia se vuelve a cambiar el dibujo a un sapo.
+
+#### La idea (profe perdón de antemano el final queda más bonito):
+
+<p align="center">
+<img width="643" height="365" alt="image" src="https://github.com/user-attachments/assets/c2ac1eb4-8311-4245-b027-63ef65060f65" />
+</p>
+
+En realidad la página de la princesa nunca cambiaría, solo la del sapo. Si veo que quizá puedo agregar muchas más cosas lo iré modificando 
+
+- **La página del sapo:**
+
+Planeo tener en cuenta la distancia que se mide constantemente entre los dos e implementar 3 casos según la distancia y un booleano quizá que tenga en cuenta que se hayan dado el beso sin alejarse mucho despues.
+
+1. Si la posición no es la exacta del beso, sin importar la distancia a la que está, y además el bool es falso entonces será un sapo y nada cambia.
+2. Si la posición es la del beso y el booleano es falso (entonces aún no se han dado el beso), el bool pasa a ser verdadero y el sapo se convierte en un principe.
+3. Si el booleano es verdadero pero se alejan mucho las páginas pasa a ser falso y vuelve a ser un sapo.
+
+Quizá agregué más cositas si puedo, como distintos dibujos en distintos momentos de la aplicación y también que pase algo más cuando se choquen las pantallas quizá que se vaya llenando un corazon y cuando se llene ahí si se convierta en principe.
+
+#### Bocetos:
+
+
+
+### Implementa tu idea.
+
+Inicialmente me voy a dedicar a hacer los diseños simples de la princesa y el sapo e implementarlos en las páginas sin aún cambiar ninguna lógica.
+
+### Incluye todos los códigos (servidor y clientes) en tu bitácora.
+
+#### Código del servidor.
+
+```
+wa
+```
