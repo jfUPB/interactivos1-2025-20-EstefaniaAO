@@ -4,7 +4,7 @@
 Caso de estudio:
 
 page1.html
-~~~
+~~~html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -29,7 +29,7 @@ page1.html
 ~~~
 
 page1.js
-~~~
+~~~js
 let currentPageData = {
     x: window.screenX,
     y: window.screenY,
@@ -181,7 +181,7 @@ function windowResized() {
 ~~~
 
 page2.html
-~~~
+~~~html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -207,7 +207,7 @@ page2.html
 ~~~
 
 page2.js
-~~~
+~~~js
 let currentPageData = {
     x: window.screenX,
     y: window.screenY,
@@ -359,7 +359,7 @@ function windowResized() {
 ~~~
 
 server.js
-~~~
+~~~js
 const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
@@ -892,7 +892,7 @@ wa
 
 ### Explica tu idea y realiza algunos bocetos.
 
-Mi idea es modificar la aplicación volviendo los circulos una princesa y un sapo. Básicamente mi idea es que al estar las páginas alineadas especificamente para que los labios de la princesa y el sapo se encuentren entonces el sapo se transforma en un príncipe, y si se vuelven a alejar cierta distancia se vuelve a cambiar el dibujo a un sapo.
+Mi idea es modificar la aplicación volviendo los circulos una princesa y un sapo. Básicamente mi idea es que al estar las páginas alineadas especificamente para que los labios de la princesa y el sapo se encuentren entonces el sapo se transforma en un príncipe.
 
 #### La idea (profe perdón de antemano el final queda más bonito):
 
@@ -904,13 +904,12 @@ En realidad la página de la princesa nunca cambiaría, solo la del sapo. Si veo
 
 - **La página del sapo:**
 
-Planeo tener en cuenta la distancia que se mide constantemente entre los dos e implementar 3 casos según la distancia y un booleano quizá que tenga en cuenta que se hayan dado el beso sin alejarse mucho despues.
+Planeo tener en cuenta la distancia que se mide constantemente entre los dos e implementar 2 casos según la distancia y un booleano quizá que tenga en cuenta que se hayan dado el beso sin alejarse mucho despues.
 
 1. Si la posición no es la exacta del beso, sin importar la distancia a la que está, y además el bool es falso entonces será un sapo y nada cambia.
 2. Si la posición es la del beso y el booleano es falso (entonces aún no se han dado el beso), el bool pasa a ser verdadero y el sapo se convierte en un principe.
-3. Si el booleano es verdadero pero se alejan mucho las páginas pasa a ser falso y vuelve a ser un sapo.
 
-Quizá agregué más cositas si puedo, como distintos dibujos en distintos momentos de la aplicación y también que pase algo más cuando se choquen las pantallas quizá que se vaya llenando un corazon y cuando se llene ahí si se convierta en principe.
+Quizá agregué más cositas si puedo, como distintos dibujos en distintos momentos de la aplicación y también que pase algo más cuando se choquen las pantallas quizá que se vaya llenando un corazon y cuando se llene ahí si se convierta en principe. (El ultimo si pude)
 
 #### Bocetos:
 
@@ -920,6 +919,244 @@ Quizá agregué más cositas si puedo, como distintos dibujos en distintos momen
 
 Inicialmente me voy a dedicar a hacer los diseños simples de la princesa y el sapo e implementarlos en las páginas sin aún cambiar ninguna lógica.
 
+Despúes de muchos intentos la verdad fue algo complejo dibujar con las figuras, voy a añadir fotos del proceso donde también intentando con una IA quedaban terribles
+
+<img width="147" height="203" alt="image" src="https://github.com/user-attachments/assets/c05341c1-342e-4f56-8fe2-d275bf615447" />
+
+<img width="154" height="132" alt="image" src="https://github.com/user-attachments/assets/82fab33f-9beb-40e2-b01a-af8547e05c2c" />
+
+<img width="680" height="223" alt="image" src="https://github.com/user-attachments/assets/f31745ee-f031-4d33-9015-a7381148c228" />
+
+<img width="200" height="272" alt="image" src="https://github.com/user-attachments/assets/808ea1bc-5795-4342-b7b2-7545d41656e2" />
+
+<img width="253" height="262" alt="image" src="https://github.com/user-attachments/assets/c6a7b71e-ff71-4fee-86ed-c3a538417155" />
+
+Ahí me rendí y decidí hacer batman principe y batman princesa. Usé chatGPT para que me hiciera la base que fue tambien un poco feo:
+<img width="330" height="296" alt="image" src="https://github.com/user-attachments/assets/27cdbb7c-f498-4243-ac4f-953debab8a15" />
+Y de ahí lo modifiqué yo hasta el resultado final.
+
+```js
+function drawPrincess(x, y) {
+    push();
+    translate(x, y);
+    
+    // corona
+    fill(210, 160, 60);
+    noStroke();
+    rectMode(CENTER);
+    rect(0, -102, 20, 5);
+
+    // triángulos de la corona
+    beginShape();
+    vertex(-10, -104);
+    vertex(-7, -118);
+    vertex(-5, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(-2, -104);
+    vertex(0, -118);
+    vertex(2, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(5, -104);
+    vertex(7, -118);
+    vertex(10, -104);
+    endShape(CLOSE);
+
+    // joyas
+    fill(255, 105, 180);
+    ellipse(-7, -118, 4, 4);
+    ellipse(0, -118, 4, 4);
+    ellipse(7, -118, 4, 4);
+
+    // cuerpo
+    fill(0);
+    beginShape();
+    vertex(-60, 40);
+    vertex(-40, -60);
+    vertex(40, -60);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // capa
+    beginShape();
+    vertex(-60, 40);
+    vertex(-80, 80);
+    vertex(80, 80);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // cabeza con orejas
+    beginShape();
+    vertex(-20, -60);
+    vertex(-20, -100);
+    vertex(-16, -112);
+    vertex(-12, -100);
+    vertex(0, -100);
+    vertex(12, -100);
+    vertex(16, -112);
+    vertex(20, -100);
+    vertex(20, -60);
+    endShape(CLOSE);
+
+    // cara
+    fill(255);
+    rect(0, -75, 30, 20, 5);
+
+    // ojos
+    fill(255);
+    quad(-14, -95, -6, -91, -2, -89, -11, -86);
+    quad(14, -95, 6, -91, 2, -89, 11, -86);
+
+    // boca
+    stroke(0);
+    strokeWeight(2);
+    line(-5, -75, 5, -75);
+
+    pop();
+}
+
+function drawFrog(x, y, scaleFactor = 0.5) {
+    push();
+    translate(x, y);
+    scale(scaleFactor);
+
+    // cuerpo
+    fill(120, 220, 120);
+    ellipse(0, 40, 140, 100);
+
+    // barriga
+    fill(255, 240, 180);
+    ellipse(0, 50, 90, 70);
+
+    // cabeza
+    fill(120, 220, 120);
+    ellipse(0, -20, 120, 90);
+
+    // cachetes
+    ellipse(-50, -5, 40, 40);
+    ellipse(50, -5, 40, 40);
+
+    // ojos
+    fill(255);
+    ellipse(-30, -45, 35, 35);
+    ellipse(30, -45, 35, 35);
+    fill(0);
+    ellipse(-30, -45, 18, 18);
+    ellipse(30, -45, 18, 18);
+
+    // rubor
+    fill(255, 150, 150, 180);
+    ellipse(-30, -25, 18, 10);
+    ellipse(30, -25, 18, 10);
+
+    // sonrisa
+    noFill();
+    stroke(0);
+    strokeWeight(4);
+    arc(0, -20, 60, 40, 0, PI);
+
+    // patas
+    noStroke();
+    fill(120, 220, 120);
+    ellipse(-60, 80, 40, 30);
+    ellipse(60, 80, 40, 30);
+
+    // manchitas
+    fill(70, 180, 90);
+    ellipse(40, -10, 15, 15);
+    ellipse(55, -20, 12, 12);
+    ellipse(50, 0, 10, 10);
+
+    pop();
+}
+
+function drawPrince(x, y) {
+    push();
+    translate(x, y);
+    
+    // corona
+    fill(210, 160, 60);
+    noStroke();
+    rectMode(CENTER);
+    rect(0, -102, 20, 5);
+
+    // triángulos corona
+    beginShape();
+    vertex(-10, -104);
+    vertex(-7, -118);
+    vertex(-5, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(-2, -104);
+    vertex(0, -118);
+    vertex(2, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(5, -104);
+    vertex(7, -118);
+    vertex(10, -104);
+    endShape(CLOSE);
+
+    // joyas
+    fill(70, 130, 180);
+    ellipse(-7, -118, 4, 4);
+    ellipse(0, -118, 4, 4);
+    ellipse(7, -118, 4, 4);
+
+    // cuerpo
+    fill(0);
+    beginShape();
+    vertex(-60, 40);
+    vertex(-40, -60);
+    vertex(40, -60);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // capa
+    beginShape();
+    vertex(-60, 40);
+    vertex(-80, 80);
+    vertex(80, 80);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // cabeza
+    beginShape();
+    vertex(-20, -60);
+    vertex(-20, -100);
+    vertex(-16, -112);
+    vertex(-12, -100);
+    vertex(0, -100);
+    vertex(12, -100);
+    vertex(16, -112);
+    vertex(20, -100);
+    vertex(20, -60);
+    endShape(CLOSE);
+
+    // cara
+    fill(255);
+    rect(0, -75, 30, 20, 5);
+
+    // ojos
+    fill(255);
+    quad(-14, -95, -6, -91, -2, -89, -11, -86);
+    quad(14, -95, 6, -91, 2, -89, 11, -86);
+
+    // boca
+    stroke(0);
+    strokeWeight(2);
+    line(-5, -75, 5, -75);
+
+    pop();
+}
+```
+
+
 ### Incluye todos los códigos (servidor y clientes) en tu bitácora.
 
 #### Código del servidor.
@@ -927,6 +1164,7 @@ Inicialmente me voy a dedicar a hacer los diseños simples de la princesa y el s
 ```
 wa
 ```
+
 
 
 
