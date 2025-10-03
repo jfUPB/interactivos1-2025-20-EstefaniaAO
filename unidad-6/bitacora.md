@@ -1155,14 +1155,956 @@ function drawPrince(x, y) {
     pop();
 }
 ```
+Agregué la lógica de `isPrince` para manejar la transformación de personaje cuando el corazón se llena:
+
+```js
+let isPrince = false; // princesa nunca empieza como príncipe
+
+if (heartFill >= 100 && !isPrince) {
+    isPrince = true;
+    socket.emit('win1update', { ...currentPageData, isPrince }); // avisar cambio
+}
+```
+
+Se diferenciaron los personajes propios y remotos con `remoteIsPrince` y control en el `draw()`:
+
+```js
+if (hasRemoteData) {
+    if (remoteIsPrince) drawPrince(remoteX, remoteY);
+    else drawFrog(remoteX, remoteY);
+}
+```
+
+En la segunda página se invierte la lógica, manteniendo al remoto como princesa:
+
+```js
+if (isPrince) drawPrince(point2[0], point2[1]);
+else drawFrog(point2[0], point2[1]);
+
+drawPrincess(remoteX, remoteY);
+```
+
+Ajusté las coronas y joyas según el personaje para diferenciarlos visualmente:
+
+```js
+// Princesa
+fill(255, 105, 180); // rosa
+
+// Príncipe
+fill(70, 130, 180); // azul zafiro
+```
+
+Se mantuvo la sincronización con sockets incluyendo `isPrince`:
+
+```js
+socket.on('getdata', (response) => {
+    if (response && response.data && isValidRemoteData(response.data)) {
+        remotePageData = response.data;
+        hasRemoteData = true;
+        if (response.data.isPrince !== undefined) {
+            remoteIsPrince = response.data.isPrince;
+        }
+        socket.emit('confirmSync');
+    }
+});
+```
+
+Implementé el corazón como trigger de transformación al acercarse los personajes:
+
+```js
+if (dist(point1[0], point1[1], remoteX, remoteY) < 50) {
+    heartFill = min(heartFill + 1, 100);
+} else {
+    heartFill = max(heartFill - 1, 0);
+}
+drawHeart((point1[0] + remoteX) / 2, (point1[1] + remoteY) / 2, heartFill);
+```
+
+Se actualizan los datos emitidos para sincronizar el estado de la transformación:
+
+```js
+socket.emit('win1update', { ...currentPageData, isPrince });
+```
 
 
 ### Incluye todos los códigos (servidor y clientes) en tu bitácora.
 
 #### Código del servidor.
 
+```js
+const express = require('express');
+const http = require('http');
+const socketIO = require('socket.io');
+const path = require('path');
+const app = express();
+const server = http.createServer(app); 
+const io = socketIO(server); 
+const port = 3000;
+
+let page1 = { x: 0, y: 0, width: 100, height: 100 };
+let page2 = { x: 0, y: 0, width: 100, height: 100 };
+let connectedClients = new Map();
+let syncedClients = new Set();
+
+app.use(express.static(path.join(__dirname, 'views')));
+
+app.get('/page1', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'page1.html'));
+});
+
+app.get('/page2', (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'page2.html'));
+});
+
+io.on('connection', (socket) => {
+    console.log('A user connected - ID:', socket.id);
+    connectedClients.set(socket.id, { page: null, synced: false });
+    
+    socket.on('disconnect', () => {
+        console.log('User disconnected - ID:', socket.id);
+        connectedClients.delete(socket.id);
+        syncedClients.delete(socket.id);
+        // Notificar a otros clientes que se perdió la sincronización
+        socket.broadcast.emit('peerDisconnected');
+    });
+
+    socket.on('win1update', (window1, sendid) => {
+        console.log('Received win1update from ID:', socket.id, 'Data:', window1);
+        if (isValidWindowData(window1)) {
+            page1 = window1;
+            connectedClients.set(socket.id, { page: 'page1', synced: false });
+            socket.broadcast.emit('getdata', { data: page1, from: 'page1' });
+            checkAndNotifySyncStatus();
+        }
+    });
+
+    socket.on('win2update', (window2, sendid) => {
+        console.log('Received win2update from ID:', socket.id, 'Data:', window2);
+        if (isValidWindowData(window2)) {
+            page2 = window2;
+            connectedClients.set(socket.id, { page: 'page2', synced: false });
+            socket.broadcast.emit('getdata', { data: page2, from: 'page2' });
+            checkAndNotifySyncStatus();
+        }
+    });
+
+    socket.on('requestSync', () => {
+        const clientInfo = connectedClients.get(socket.id);
+        if (clientInfo?.page === 'page1') {
+            socket.emit('getdata', { data: page2, from: 'page2' });
+        } else if (clientInfo?.page === 'page2') {
+            socket.emit('getdata', { data: page1, from: 'page1' });
+        }
+    });
+
+    socket.on('confirmSync', () => {
+        syncedClients.add(socket.id);
+        const clientInfo = connectedClients.get(socket.id);
+        if (clientInfo) {
+            connectedClients.set(socket.id, { ...clientInfo, synced: true });
+        }
+        checkAndNotifySyncStatus();
+    });    
+});
+
+function isValidWindowData(data) {
+    return data && 
+           typeof data.x === 'number' && 
+           typeof data.y === 'number' && 
+           typeof data.width === 'number' && data.width > 0 &&
+           typeof data.height === 'number' && data.height > 0;
+}
+
+function checkAndNotifySyncStatus() {
+    const page1Clients = Array.from(connectedClients.entries()).filter(([id, info]) => info.page === 'page1');
+    const page2Clients = Array.from(connectedClients.entries()).filter(([id, info]) => info.page === 'page2');
+    
+    const bothPagesConnected = page1Clients.length > 0 && page2Clients.length > 0;
+    const allClientsSynced = Array.from(connectedClients.keys()).every(id => syncedClients.has(id));
+    const hasMinimumClients = connectedClients.size >= 2;
+
+    console.log(`Debug - Connected clients: ${connectedClients.size}, Page1: ${page1Clients.length}, Page2: ${page2Clients.length}, Synced: ${syncedClients.size}`);
+
+    
+    if (bothPagesConnected && allClientsSynced && hasMinimumClients) {
+        io.emit('fullySynced', true);
+        console.log('All clients are fully synced');
+    } else {
+        io.emit('fullySynced', false);
+        console.log(`Sync status: pages=${bothPagesConnected}, synced=${allClientsSynced}, clients=${connectedClients.size}`);
+    }
+}
+
+server.listen(port, () => {
+    console.log(`Server is listening on http://localhost:${port}`);
+});
+
 ```
-wa
+#### Page1
+
+```js
+let currentPageData = {
+    x: window.screenX,
+    y: window.screenY,
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+
+let previousPageData = { ...currentPageData };
+let remotePageData = { x: 0, y: 0, width: 100, height: 100 };
+
+let point1 = [currentPageData.width / 2, currentPageData.height / 2];
+let socket;
+let isConnected = false;
+let hasRemoteData = false;
+let isFullySynced = false;
+let remoteIsPrince = false;
+
+let heartFill = 0;
+let isPrince = false; // princesa nunca empieza como príncipe
+
+function setup() {
+    createCanvas(windowWidth, windowHeight);
+    frameRate(60);
+    socket = io();
+
+    socket.on('connect', () => {
+        isConnected = true;
+        socket.emit('win1update', { ...currentPageData, isPrince }, socket.id);
+        setTimeout(() => socket.emit('requestSync'), 500);
+    });
+
+    socket.on('getdata', (response) => {
+        if (response && response.data && isValidRemoteData(response.data)) {
+            remotePageData = response.data;
+            hasRemoteData = true;
+            if (response.data.isPrince !== undefined) {
+                remoteIsPrince = response.data.isPrince;
+            }
+            socket.emit('confirmSync');
+        }
+    });
+
+    socket.on('fullySynced', (synced) => {
+        isFullySynced = synced;
+    });
+
+    socket.on('peerDisconnected', () => {
+        hasRemoteData = false;
+        isFullySynced = false;
+        heartFill = 0;
+        remoteIsPrince = false;
+    });
+
+    socket.on('disconnect', () => {
+        isConnected = false;
+        hasRemoteData = false;
+        isFullySynced = false;
+        heartFill = 0;
+        remoteIsPrince = false;
+    });
+}
+
+function isValidRemoteData(data) {
+    return data &&
+        typeof data.x === 'number' &&
+        typeof data.y === 'number' &&
+        typeof data.width === 'number' && data.width > 0 &&
+        typeof data.height === 'number' && data.height > 0;
+}
+
+function checkWindowPosition() {
+    currentPageData = {
+        x: window.screenX,
+        y: window.screenY,
+        width: window.innerWidth,
+        height: window.innerHeight
+    };
+
+    if (JSON.stringify(currentPageData) !== JSON.stringify(previousPageData)) {
+        point1 = [currentPageData.width / 2, currentPageData.height / 2]
+        socket.emit('win1update', { ...currentPageData, isPrince }); // enviar isPrince
+        previousPageData = { ...currentPageData };
+    }
+}
+
+function draw() {
+    background(220);
+
+    if (!isConnected) { showStatus('Conectando...', color(255, 165, 0)); return; }
+    if (!hasRemoteData) { showStatus('Esperando otra ventana...', color(255, 165, 0)); return; }
+    if (!isFullySynced) { showStatus('Sincronizando...', color(255, 165, 0)); return; }
+
+    checkWindowPosition();
+
+    let vector1 = createVector(currentPageData.x, currentPageData.y);
+    let vector2 = createVector(remotePageData.x, remotePageData.y);
+    let resultingVector = createVector(vector2.x - vector1.x, vector2.y - vector1.y);
+
+    let remoteX = resultingVector.x + remotePageData.width / 2;
+    let remoteY = resultingVector.y + remotePageData.height / 2;
+
+    // Dibujar personaje propio
+    drawPrincess(point1[0], point1[1]);
+
+    // Dibujar personaje remoto
+    if (hasRemoteData) {
+        if (remoteIsPrince) drawPrince(remoteX, remoteY);
+        else drawFrog(remoteX, remoteY);
+    }
+
+    // Heart
+    if (dist(point1[0], point1[1], remoteX, remoteY) < 50) {
+        heartFill = min(heartFill + 1, 100);
+    } else {
+        heartFill = max(heartFill - 1, 0);
+    }
+
+    if (heartFill >= 100 && !isPrince) {
+        isPrince = true;
+        socket.emit('win1update', { ...currentPageData, isPrince }); // avisar cambio
+    }
+
+    drawHeart((point1[0] + remoteX) / 2, (point1[1] + remoteY) / 2, heartFill);
+}
+
+function drawPrincess(x, y) {
+    push();
+    translate(x, y);
+    
+    // corona
+    fill(210, 160, 60);
+    noStroke();
+    rectMode(CENTER);
+    rect(0, -102, 20, 5);
+
+    // triángulos de la corona
+    beginShape();
+    vertex(-10, -104);
+    vertex(-7, -118);
+    vertex(-5, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(-2, -104);
+    vertex(0, -118);
+    vertex(2, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(5, -104);
+    vertex(7, -118);
+    vertex(10, -104);
+    endShape(CLOSE);
+
+    // joyas
+    fill(255, 105, 180);
+    ellipse(-7, -118, 4, 4);
+    ellipse(0, -118, 4, 4);
+    ellipse(7, -118, 4, 4);
+
+    // cuerpo
+    fill(0);
+    beginShape();
+    vertex(-60, 40);
+    vertex(-40, -60);
+    vertex(40, -60);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // capa
+    beginShape();
+    vertex(-60, 40);
+    vertex(-80, 80);
+    vertex(80, 80);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // cabeza con orejas
+    beginShape();
+    vertex(-20, -60);
+    vertex(-20, -100);
+    vertex(-16, -112);
+    vertex(-12, -100);
+    vertex(0, -100);
+    vertex(12, -100);
+    vertex(16, -112);
+    vertex(20, -100);
+    vertex(20, -60);
+    endShape(CLOSE);
+
+    // cara
+    fill(255);
+    rect(0, -75, 30, 20, 5);
+
+    // ojos
+    fill(255);
+    quad(-14, -95, -6, -91, -2, -89, -11, -86);
+    quad(14, -95, 6, -91, 2, -89, 11, -86);
+
+    // boca
+    stroke(0);
+    strokeWeight(2);
+    line(-5, -75, 5, -75);
+
+    pop();
+}
+
+function drawFrog(x, y, scaleFactor = 0.5) {
+    push();
+    translate(x, y);
+    scale(scaleFactor);
+
+    // cuerpo
+    fill(120, 220, 120);
+    ellipse(0, 40, 140, 100);
+
+    // barriga
+    fill(255, 240, 180);
+    ellipse(0, 50, 90, 70);
+
+    // cabeza
+    fill(120, 220, 120);
+    ellipse(0, -20, 120, 90);
+
+    // cachetes
+    ellipse(-50, -5, 40, 40);
+    ellipse(50, -5, 40, 40);
+
+    // ojos
+    fill(255);
+    ellipse(-30, -45, 35, 35);
+    ellipse(30, -45, 35, 35);
+    fill(0);
+    ellipse(-30, -45, 18, 18);
+    ellipse(30, -45, 18, 18);
+
+    // rubor
+    fill(255, 150, 150, 180);
+    ellipse(-30, -25, 18, 10);
+    ellipse(30, -25, 18, 10);
+
+    // sonrisa
+    noFill();
+    stroke(0);
+    strokeWeight(4);
+    arc(0, -20, 60, 40, 0, PI);
+
+    // patas
+    noStroke();
+    fill(120, 220, 120);
+    ellipse(-60, 80, 40, 30);
+    ellipse(60, 80, 40, 30);
+
+    // manchitas
+    fill(70, 180, 90);
+    ellipse(40, -10, 15, 15);
+    ellipse(55, -20, 12, 12);
+    ellipse(50, 0, 10, 10);
+
+    pop();
+}
+
+function drawPrince(x, y) {
+    push();
+    translate(x, y);
+    
+    // corona
+    fill(210, 160, 60);
+    noStroke();
+    rectMode(CENTER);
+    rect(0, -102, 20, 5);
+
+    // triángulos corona
+    beginShape();
+    vertex(-10, -104);
+    vertex(-7, -118);
+    vertex(-5, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(-2, -104);
+    vertex(0, -118);
+    vertex(2, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(5, -104);
+    vertex(7, -118);
+    vertex(10, -104);
+    endShape(CLOSE);
+
+    // joyas
+    fill(70, 130, 180);
+    ellipse(-7, -118, 4, 4);
+    ellipse(0, -118, 4, 4);
+    ellipse(7, -118, 4, 4);
+
+    // cuerpo
+    fill(0);
+    beginShape();
+    vertex(-60, 40);
+    vertex(-40, -60);
+    vertex(40, -60);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // capa
+    beginShape();
+    vertex(-60, 40);
+    vertex(-80, 80);
+    vertex(80, 80);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // cabeza
+    beginShape();
+    vertex(-20, -60);
+    vertex(-20, -100);
+    vertex(-16, -112);
+    vertex(-12, -100);
+    vertex(0, -100);
+    vertex(12, -100);
+    vertex(16, -112);
+    vertex(20, -100);
+    vertex(20, -60);
+    endShape(CLOSE);
+
+    // cara
+    fill(255);
+    rect(0, -75, 30, 20, 5);
+
+    // ojos
+    fill(255);
+    quad(-14, -95, -6, -91, -2, -89, -11, -86);
+    quad(14, -95, 6, -91, 2, -89, 11, -86);
+
+    // boca
+    stroke(0);
+    strokeWeight(2);
+    line(-5, -75, 5, -75);
+
+    pop();
+}
+
+
+
+function drawHeart(x, y, fillPercent) {
+    push();
+    translate(x, y);
+    scale(0.5);
+
+    let c = color(255, 0, 0);
+    fill(red(c), green(c), blue(c), map(fillPercent, 0, 100, 50, 255));
+    noStroke();
+
+    beginShape();
+    vertex(0, -30);
+    bezierVertex(25, -60, 70, -20, 0, 50);
+    bezierVertex(-70, -20, -25, -60, 0, -30);
+    endShape(CLOSE);
+    pop();
+}
+
+function showStatus(message, statusColor) {
+    textSize(24);
+    textAlign(CENTER, CENTER);
+    noStroke();
+    fill(0, 0, 0, 150);
+    rectMode(CENTER);
+    let textW = textWidth(message) + 40;
+    rect(width / 2, height / 6, textW, 40, 10);
+    fill(statusColor);
+    text(message, width / 2, height / 6);
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+}
+
+```
+#### Page2
+
+```js
+let currentPageData = {
+    x: window.screenX,
+    y: window.screenY,
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+
+let previousPageData = { ...currentPageData };
+let remotePageData = { x: 0, y: 0, width: 100, height: 100 };
+
+let point2 = [currentPageData.width / 2, currentPageData.height / 2];
+let socket;
+let remoteIsPrince = false;
+let isConnected = false;
+let hasRemoteData = false;
+let isFullySynced = false;
+
+let heartFill = 0;
+let isPrince = false;
+
+function setup() {
+    createCanvas(windowWidth, windowHeight);
+    frameRate(60);
+    socket = io();
+
+    socket.on('connect', () => {
+        isConnected = true;
+        socket.emit('win2update', { ...currentPageData, isPrince }, socket.id);
+        setTimeout(() => socket.emit('requestSync'), 500);
+    });
+
+    socket.on('getdata', (response) => {
+        if (response && response.data && isValidRemoteData(response.data)) {
+            remotePageData = response.data;
+            hasRemoteData = true;
+            if (response.data.isPrince !== undefined) remoteIsPrince = response.data.isPrince;
+            socket.emit('confirmSync');
+        }
+    });
+
+    socket.on('fullySynced', (synced) => { isFullySynced = synced; });
+
+    socket.on('peerDisconnected', () => {
+        hasRemoteData = false;
+        isFullySynced = false;
+        heartFill = 0;
+        isPrince = false;
+        remoteIsPrince = false;
+    });
+
+    socket.on('disconnect', () => {
+        isConnected = false;
+        hasRemoteData = false;
+        isFullySynced = false;
+        heartFill = 0;
+        isPrince = false;
+        remoteIsPrince = false;
+    });
+}
+
+function isValidRemoteData(data) {
+    return data &&
+        typeof data.x === 'number' &&
+        typeof data.y === 'number' &&
+        typeof data.width === 'number' && data.width > 0 &&
+        typeof data.height === 'number' && data.height > 0;
+}
+
+function checkWindowPosition() {
+    currentPageData = {
+        x: window.screenX,
+        y: window.screenY,
+        width: window.innerWidth,
+        height: window.innerHeight
+    };
+
+    if (JSON.stringify(currentPageData) !== JSON.stringify(previousPageData)) {
+        point2 = [currentPageData.width / 2, currentPageData.height / 2];
+        socket.emit('win2update', { ...currentPageData, isPrince });
+        previousPageData = { ...currentPageData };
+    }
+}
+
+function draw() {
+    background(220);
+
+    if (!isConnected) { showStatus('Conectando...', color(255, 165, 0)); return; }
+    if (!hasRemoteData) { showStatus('Esperando otra ventana...', color(255, 165, 0)); return; }
+    if (!isFullySynced) { showStatus('Sincronizando...', color(255, 165, 0)); return; }
+
+    checkWindowPosition();
+
+    let vector2 = createVector(remotePageData.x, remotePageData.y);
+    let vector1 = createVector(currentPageData.x, currentPageData.y);
+    let resultingVector = createVector(vector2.x - vector1.x, vector2.y - vector1.y);
+
+    let remoteX = resultingVector.x + remotePageData.width / 2;
+    let remoteY = resultingVector.y + remotePageData.height / 2;
+
+    // Dibujar personaje propio
+    if (isPrince) drawPrince(point2[0], point2[1]);
+    else drawFrog(point2[0], point2[1]);
+
+    // Dibujar personaje remoto
+    if (hasRemoteData) {
+        
+        drawPrincess(remoteX, remoteY);
+    }
+
+    // Heart
+    if (dist(point2[0], point2[1], remoteX, remoteY) < 50) {
+        heartFill = min(heartFill + 1, 100);
+    } else {
+        heartFill = max(heartFill - 1, 0);
+    }
+
+    if (heartFill >= 100 && !isPrince) {
+        isPrince = true;
+        socket.emit('win2update', { ...currentPageData, isPrince });
+    }
+
+    drawHeart((point2[0] + remoteX) / 2, (point2[1] + remoteY) / 2, heartFill);
+}
+
+function drawPrincess(x, y) {
+    push();
+    translate(x, y);
+    
+    // corona
+    fill(210, 160, 60);
+    noStroke();
+    rectMode(CENTER);
+    rect(0, -102, 20, 5);
+
+    // triángulos de la corona
+    beginShape();
+    vertex(-10, -104);
+    vertex(-7, -118);
+    vertex(-5, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(-2, -104);
+    vertex(0, -118);
+    vertex(2, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(5, -104);
+    vertex(7, -118);
+    vertex(10, -104);
+    endShape(CLOSE);
+
+    // joyas
+    fill(255, 105, 180);
+    ellipse(-7, -118, 4, 4);
+    ellipse(0, -118, 4, 4);
+    ellipse(7, -118, 4, 4);
+
+    // cuerpo
+    fill(0);
+    beginShape();
+    vertex(-60, 40);
+    vertex(-40, -60);
+    vertex(40, -60);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // capa
+    beginShape();
+    vertex(-60, 40);
+    vertex(-80, 80);
+    vertex(80, 80);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // cabeza con orejas
+    beginShape();
+    vertex(-20, -60);
+    vertex(-20, -100);
+    vertex(-16, -112);
+    vertex(-12, -100);
+    vertex(0, -100);
+    vertex(12, -100);
+    vertex(16, -112);
+    vertex(20, -100);
+    vertex(20, -60);
+    endShape(CLOSE);
+
+    // cara
+    fill(255);
+    rect(0, -75, 30, 20, 5);
+
+    // ojos
+    fill(255);
+    quad(-14, -95, -6, -91, -2, -89, -11, -86);
+    quad(14, -95, 6, -91, 2, -89, 11, -86);
+
+    // boca
+    stroke(0);
+    strokeWeight(2);
+    line(-5, -75, 5, -75);
+
+    pop();
+}
+
+function drawFrog(x, y, scaleFactor = 0.5) {
+    push();
+    translate(x, y);
+    scale(scaleFactor);
+
+    // cuerpo
+    fill(120, 220, 120);
+    ellipse(0, 40, 140, 100);
+
+    // barriga
+    fill(255, 240, 180);
+    ellipse(0, 50, 90, 70);
+
+    // cabeza
+    fill(120, 220, 120);
+    ellipse(0, -20, 120, 90);
+
+    // cachetes
+    ellipse(-50, -5, 40, 40);
+    ellipse(50, -5, 40, 40);
+
+    // ojos
+    fill(255);
+    ellipse(-30, -45, 35, 35);
+    ellipse(30, -45, 35, 35);
+    fill(0);
+    ellipse(-30, -45, 18, 18);
+    ellipse(30, -45, 18, 18);
+
+    // rubor
+    fill(255, 150, 150, 180);
+    ellipse(-30, -25, 18, 10);
+    ellipse(30, -25, 18, 10);
+
+    // sonrisa
+    noFill();
+    stroke(0);
+    strokeWeight(4);
+    arc(0, -20, 60, 40, 0, PI);
+
+    // patas
+    noStroke();
+    fill(120, 220, 120);
+    ellipse(-60, 80, 40, 30);
+    ellipse(60, 80, 40, 30);
+
+    // manchitas
+    fill(70, 180, 90);
+    ellipse(40, -10, 15, 15);
+    ellipse(55, -20, 12, 12);
+    ellipse(50, 0, 10, 10);
+
+    pop();
+}
+
+function drawPrince(x, y) {
+    push();
+    translate(x, y);
+    
+    // corona
+    fill(210, 160, 60);
+    noStroke();
+    rectMode(CENTER);
+    rect(0, -102, 20, 5);
+
+    // triángulos corona
+    beginShape();
+    vertex(-10, -104);
+    vertex(-7, -118);
+    vertex(-5, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(-2, -104);
+    vertex(0, -118);
+    vertex(2, -104);
+    endShape(CLOSE);
+
+    beginShape();
+    vertex(5, -104);
+    vertex(7, -118);
+    vertex(10, -104);
+    endShape(CLOSE);
+
+    // joyas
+    fill(70, 130, 180);
+    ellipse(-7, -118, 4, 4);
+    ellipse(0, -118, 4, 4);
+    ellipse(7, -118, 4, 4);
+
+    // cuerpo
+    fill(0);
+    beginShape();
+    vertex(-60, 40);
+    vertex(-40, -60);
+    vertex(40, -60);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // capa
+    beginShape();
+    vertex(-60, 40);
+    vertex(-80, 80);
+    vertex(80, 80);
+    vertex(60, 40);
+    endShape(CLOSE);
+
+    // cabeza
+    beginShape();
+    vertex(-20, -60);
+    vertex(-20, -100);
+    vertex(-16, -112);
+    vertex(-12, -100);
+    vertex(0, -100);
+    vertex(12, -100);
+    vertex(16, -112);
+    vertex(20, -100);
+    vertex(20, -60);
+    endShape(CLOSE);
+
+    // cara
+    fill(255);
+    rect(0, -75, 30, 20, 5);
+
+    // ojos
+    fill(255);
+    quad(-14, -95, -6, -91, -2, -89, -11, -86);
+    quad(14, -95, 6, -91, 2, -89, 11, -86);
+
+    // boca
+    stroke(0);
+    strokeWeight(2);
+    line(-5, -75, 5, -75);
+
+    pop();
+}
+
+
+
+
+
+
+function drawHeart(x, y, fillPercent) {
+    push();
+    translate(x, y);
+    scale(0.5);
+    let c = color(255, 0, 0);
+    fill(red(c), green(c), blue(c), map(fillPercent, 0, 100, 50, 255));
+    noStroke();
+    beginShape();
+    vertex(0, -30);
+    bezierVertex(25, -60, 70, -20, 0, 50);
+    bezierVertex(-70, -20, -25, -60, 0, -30);
+    endShape(CLOSE);
+    pop();
+}
+
+function showStatus(message, statusColor) {
+    textSize(24);
+    textAlign(CENTER, CENTER);
+    noStroke();
+    fill(0, 0, 0, 150);
+    rectMode(CENTER);
+    let textW = textWidth(message) + 40;
+    rect(width / 2, height / 6, textW, 40, 10);
+    fill(statusColor);
+    text(message, width / 2, height / 6);
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+}
+
 ```
 
 
