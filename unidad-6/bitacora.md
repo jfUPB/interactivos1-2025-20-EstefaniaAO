@@ -2225,8 +2225,9 @@ Todas las actividades están completas.
 | Actividad | Autoevaluación |
 |-----------|----------------|
 | [Actividad 01](#actividad-01) | 1. Respondí todas las preguntas que pedían, probé la sincronización entre las páginas y confirmé que los datos de posición y tamaño se envían correctamente. Aprendí cómo Socket.IO permite comunicación en tiempo real entre cliente y servidor. |
-| [Actividad 02](#actividad-02) | 1. Hice todas las preguntas, exploré cómo funciona la comunicación cliente-servidor y entendí mejor los protocolos HTTP y WebSockets. Mirando formularios simples y cómo HTML, CSS y JS trabajan juntos. |
+| [Actividad 02](#actividad-02) | 1. Hice todas las preguntas, exploré cómo funciona la comunicación cliente-servidor y entendí mejor los protocolos HTTP y WebSockets. Mirando formularios simples y cómo HTML, CSS y JS trabajan juntos. También puse imagenes de lo que iba averiguando o usaba imagenes que mostraban lo que estaba explicando. |
 | [Actividad 03](#actividad-03) | 1. Respondí todos los experimentos, hice todo lo de las rutas, puertos y conexiones de clientes. Probé abrir y cerrar páginas, y entendí cómo el servidor identifica a cada cliente y mantiene la sincronización de datos. |
 | [Actividad 04](#actividad-04) | 1. Hice todas las preguntas de todos los experimentos, probé detección de cambios de ventana. Aprendí a diferenciar datos locales y remotos y a mapear valores para cambios visuales según la distancia entre ventanas. También exploré cosas visuales y de interactividad segun la distancia de las páginas, jugando con el color del fondo, del circulo y cositas asi. |
 | [Actividad 05](#actividad-05) | 1. Cree e implementé la idea, mostrando mis ideas iniciales y explicandolas, implementé la lógica de que se dibuje de forma remota, también implementé un booleano que se comparte en las dos paginas para que funcione. Probé y sufrí mucho dibujando con las figuras en js y exploré también muchas cosas en tanto a enviar los datos entre pagina y pagina. |
+
 
