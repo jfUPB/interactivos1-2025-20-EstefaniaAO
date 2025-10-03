@@ -227,6 +227,134 @@ Se usa en aplicaciones como:
 
 ## Actividad 03:
 
+---
+### Experimento 01:
+
+> Detén el servidor si está corriendo.  
+> Cambia la primera ruta de /page1 a /pagina_uno.  
+> Inicia el servidor.  
+> Intenta acceder a http://localhost:3000/page1.  
+
+<img width="535" height="118" alt="image" src="https://github.com/user-attachments/assets/c783461b-c4bd-449b-9086-523ef86bc71d" />
+
+#### ¿Funciona?
+
+<img width="283" height="108" alt="image" src="https://github.com/user-attachments/assets/009e6d37-292f-4525-8772-ee40c34b61ba" />
+No, no funciona ya que la ruta no coincide con la nueva del server.
+
+> Ahora intenta acceder a http://localhost:3000/pagina_uno.  
+
+#### ¿Funciona?
+
+Si.
+<img width="1136" height="266" alt="image" src="https://github.com/user-attachments/assets/114e7066-ca66-4b9a-ac6e-417c0a79fbcc" />
+
+
+> Restaura el código.  
+
+#### ¿Qué te dice esto sobre cómo el servidor asocia URLs con respuestas?
+
+El servidor directamente nombra la ruta a la cual debe acceder la persona para acceder al contenido.
+
+---
+### Experimento 02:
+
+> Asegúrate de que el servidor esté corriendo (npm start).  
+> Abre http://localhost:3000/page1 en una pestaña y observa la terminal del servidor.  
+
+#### ¿Qué mensaje ves al abrir page1? Anota el ID.
+
+<img width="1059" height="405" alt="image" src="https://github.com/user-attachments/assets/db231a4f-9490-42c3-9e5d-ea1ef51eac81" />
+
+> Abre http://localhost:3000/page2 en otra pestaña y observa la terminal.  
+
+#### ¿Qué mensaje ves al abrir page2? ¿El ID es diferente?
+
+<img width="682" height="109" alt="image" src="https://github.com/user-attachments/assets/44deadaf-70eb-4c24-9785-fb23b97740b1" />
+
+> Cierra la pestaña de page1 y observa la terminal.  
+
+#### ¿Qué mensaje ves al cerrar la pestaña de page1? ¿Coincide el ID?
+
+User disconnected - ID: XCCkvFac6tpd34SBAAAB
+
+Si, el ID coincide con el de page1.
+
+> Cierra la pestaña de page2 y observa la terminal.  
+
+#### ¿Qué mensaje ves al cerrar la pestaña de page2?
+
+User disconnected - ID: R_ZTJJldVSY2sBfgAAAD
+
+---
+### Experimento 03:
+
+> Inicia el servidor y abre page1 y page2.  
+> Mueve la ventana de page1 y observa la terminal del servidor.
+<img width="1142" height="929" alt="image" src="https://github.com/user-attachments/assets/8aa52ea5-f77e-4614-8e67-642f84eb3b69" />
+
+
+#### ¿Qué evento se registra al mover page1? ¿Qué datos (Data:) ves?
+
+Por ejemplo:
+~~~
+Received win1update from ID: OxvM9vTXerJOe2NAAAAB Data: { x: 115, y: 103, width: 631, height: 562 }
+Debug - Connected clients: 2, Page1: 1, Page2: 1, Synced: 2
+All clients are fully synced
+~~~
+
+> Mueve la ventana de page2 y observa la terminal.  
+
+#### ¿Qué evento se registra al mover page2? ¿Qué datos ves?
+
+~~~
+Received win2update from ID: lyuSC7ccUcriX0xIAAAD Data: { x: 1065, y: 209, width: 612, height: 579 }
+Debug - Connected clients: 2, Page1: 1, Page2: 1, Synced: 2
+All clients are fully synced
+~~~
+
+> Cambia `socket.broadcast.emit('getdata', page1);` por `socket.emit('getdata', page1);`  
+> Reinicia el servidor y abre ambas páginas.  
+> Mueve page1.  
+
+#### ¿Se actualiza la visualización en page2? ¿Por qué sí o por qué no?
+
+<img width="1919" height="999" alt="image" src="https://github.com/user-attachments/assets/b742903e-2365-4450-ad5a-5a338e47665b" />
+
+Al reemplazar socket.broadcast.emit por socket.emit, la comunicación ya no se comparte con todos los clientes conectados, sino que se envía solo al mismo cliente que originó el mensaje. Por eso, cuando se mueve la ventana de page1, esa información no llega a page2, y parece como si estuvieran desconectadas entre sí. Lo que ocurre es que page2 nunca recibe los datos de page1, así que no puede actualizarse. En cambio, page1 sí sigue recibiendo lo que ella misma emite, pero eso no ayuda a la sincronización entre páginas.
+
+---
+### Experimento 04:
+
+> Detén el servidor.  
+> Cambia `const port = 3000;` a `const port = 3001;`.  
+> Inicia el servidor.  
+
+#### ¿Qué mensaje ves en la consola? ¿En qué puerto dice que está escuchando?
+
+<img width="932" height="170" alt="image" src="https://github.com/user-attachments/assets/177e0ed8-9015-4215-a32c-5013e41ec586" />
+
+> Intenta abrir http://localhost:3000/page1.  
+
+#### ¿Funciona?
+
+Nop
+<img width="654" height="667" alt="image" src="https://github.com/user-attachments/assets/d7d8e2a6-85da-424c-9754-b71499f86338" />
+
+
+> Intenta abrir http://localhost:3001/page1.  
+
+#### ¿Funciona?
+
+<img width="646" height="660" alt="image" src="https://github.com/user-attachments/assets/126348a1-c2fe-43f4-b71d-5233e67db081" />
+<img width="1123" height="279" alt="image" src="https://github.com/user-attachments/assets/e57d0597-9829-4914-8353-b34bfdc5d235" />
+
+
+#### ¿Qué aprendiste sobre la variable port y la función listen?
+
+El valor de port funciona como la dirección concreta donde el servidor está disponible. Al estar declarado como constante, el programa siempre “atiende” en ese mismo lugar. Si desde el navegador intentas entrar usando otro puerto, no habrá respuesta porque ahí no hay ningún servicio escuchando. Es parecido a marcar un número equivocado: aunque el teléfono existe, no llegas a la persona correcta porque no es el que está asignado.
+
+---
 
 
 ## Actividad 04:
@@ -331,4 +459,5 @@ Inicialmente me voy a dedicar a hacer los diseños simples de la princesa y el s
 ```
 wa
 ```
+
 
