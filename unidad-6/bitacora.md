@@ -119,7 +119,7 @@ Me manda al directorio de juegos de neal.fun, es la ruta la que me dirige al jue
 
 ### ¿Qué “página por defecto” crees que te envía el servidor?
 
-
+Cuando solo escribo neal.fun sin nada más, el servidor me manda a la página principal de la web, como al “inicio” de la biblioteca. O sea, no entro directo al juego, sino que me muestra el menú o la portada con las distintas opciones que ofrece el sitio. Eso pasa porque normalmente los servidores tienen configurado un archivo por defecto (tipo index.html) que se carga cuando no se especifica ninguna ruta.
 
 ---
 
@@ -128,21 +128,102 @@ Me manda al directorio de juegos de neal.fun, es la ruta la que me dirige al jue
 > HTTP (HyperText Transfer Protocol) es el conjunto de reglas estándar que usan los Navegadores (Clientes) y los Servidores para comunicarse en la web.
 
 ### Compara HTTP con los protocolos seriales que usaste.
-
-l
-
 ### ¿Qué similitudes encuentras?
 
-l
+En ambos casos hay un lenguaje común para que dos partes se entiendan. Con el micro:bit y p5.js usaba protocolos seriales que definían cómo iban a organizar los bytes y cuándo empezaba/terminaba un mensaje. Con HTTP pasa igual: el navegador y el servidor acuerdan reglas para pedir y entregar información.
 
 ### ¿Qué diferencias clave ves?
 
-l
+La comunicación serial con el micro:bit era más directa y sencilla, básicamente solo pasar bytes con cierto orden. En cambio, HTTP es mucho más estructurado: no solo manda datos, también manda cabeceras, métodos (GET, POST, etc.) y estados de respuesta (200, 404, 500…), lo cual hace que el navegador sepa exactamente qué hacer con lo que recibe.
 
 ### ¿Por qué crees que HTTP necesita ser más complejo que un simple envío de bytes como hacías con el micro:bit?
 
-l
+Porque en la web se transmite mucha más información y de diferentes tipos (texto, imágenes, videos, formularios, etc.), y además participan millones de dispositivos distintos. Se necesitan reglas claras para que todo sea compatible y seguro, no como con el micro:bit que era un circuito cerrado y simple.
 
+> Cuando un servidor responde a una petición web, normalmente envía un paquete con tres tipos de archivos:
+>
+> - **HTML (HyperText Markup Language):** estructura de la página, define elementos como títulos, párrafos, imágenes y botones. (Analogía: el plano de una casa)
+> - **CSS (Cascading Style Sheets):** estilo visual de los elementos, colores, tamaños, posiciones, fuentes. (Analogía: decoración, muebles, pintura)
+> - **JavaScript (JS):** interactividad de la página, permite reaccionar a acciones del usuario, cambiar el HTML y CSS dinámicamente, enviar datos, etc. (Analogía: electricidad, plomería, electrodomésticos)
+>
+> Ejemplo: un formulario de login
+> - HTML → los campos de texto y el botón
+> - CSS → colores, fuentes, bordes redondeados, estilos visuales
+> - JS → validaciones, mensajes de error instantáneos, mostrar/ocultar contraseña
+
+### ¿Qué parte crees que es HTML (ej. los campos de texto, el botón)?
+
+HTML: arma la base: el título “Inicia sesión”, las dos casillas donde escribo mi correo y contraseña, y el botón para entrar.
+
+### ¿Qué parte es CSS (ej. el color del botón, el tipo de letra)?
+
+CSS: le da estilo: que el fondo del formulario sea blanco con sombra, que el botón tenga esquinas redondeadas y que el texto del título esté más grande y en negrilla.
+
+### ¿Qué parte es JavaScript (ej. la comprobación de si escribiste algo antes de enviar, el mensaje de “contraseña incorrecta” que aparece sin recargar la página)?
+
+JavaScript: mete la lógica: que cuando presione “Entrar” verifique si el correo tiene el formato correcto, que muestre un contador de intentos fallidos, o que me deje ver/ocultar la contraseña con un ícono de ojito.
+
+<img width="2240" height="2139" alt="image" src="https://github.com/user-attachments/assets/52f148be-47a2-4a50-868e-c1c51caf58e9" />
+
+> - El navegador construye primero la estructura HTML (**DOM**) y aplica los estilos CSS.
+> - El **JavaScript** se ejecuta cuando encuentra etiquetas `<script>` o mediante atributos como `defer` o `async`.
+> - Existen dos modelos de ejecución:
+>   - **Imperativo (como p5.js draw()):** se ejecuta paso a paso en un bucle constante.
+>   - **Basado en eventos (JS moderno en la web):** las funciones se ejecutan solo cuando ocurre un evento (clic, mensaje del servidor, cambio de tamaño de ventana, etc.).
+> - Ventajas del modelo basado en eventos:
+>   - Más eficiente, solo responde cuando ocurre algo
+>   - Interfaz más reactiva y dinámica
+>   - Permite manejar múltiples interacciones sin sobrecargar la página
+
+### Compara el bucle draw() de p5.js con este modelo de “esperar a que algo pase y reaccionar”. 
+
+En draw() todo se ejecuta en un bucle constante, repitiendo las instrucciones ~60 veces por segundo aunque no pase nada nuevo. En cambio, el modelo basado en eventos espera que ocurra algo (como un clic o un cambio de tamaño) y solo entonces ejecuta la función correspondiente. Mientras no haya eventos, no consume recursos.
+
+### ¿Qué ventajas crees que tiene el modelo basado en eventos para una interfaz de usuario web? 
+
+- Es más eficiente, porque solo se ejecuta código cuando es necesario.
+- La página se vuelve más reactiva: responde rápido a lo que hace el usuario.
+- Permite manejar muchas interacciones diferentes sin bloquear el navegador.
+
+### ¿Sería eficiente tener un bucle draw() redibujando toda la página 60 veces por segundo si nada ha cambiado?
+
+No, sería un desperdicio de recursos. El navegador tendría que recalcular y pintar elementos que no cambiaron, lo que haría la página más lenta, especialmente si hay mucho contenido.
+
+> Hasta ahora, JavaScript solo se ejecutaba dentro del navegador. Node.js permite usar el motor de JavaScript V8 de Google Chrome **fuera del navegador**, directamente en un servidor.  
+> Esto significa que podemos escribir código del lado del servidor usando el **mismo lenguaje** que usamos en el cliente.  
+> 
+> En nuestro caso de estudio, `server.js` es un script de Node.js que:
+> - Crea un servidor HTTP (como una biblioteca abierta 24/7).  
+> - Escucha peticiones de los navegadores (por ejemplo, cuando pedimos `/page1`).  
+> - Envía los archivos HTML, CSS y JS necesarios.  
+> - Maneja comunicación en tiempo real entre cliente y servidor.
+
+### ¿Por qué crees que podría ser útil usar JavaScript tanto en el cliente (navegador) como en el servidor?
+
+Es útil porque no necesitamos aprender un lenguaje distinto para el servidor. Podemos manejar toda la lógica de la aplicación con JavaScript, lo que hace que el desarrollo sea más consistente y rápido, y facilita compartir código entre cliente y servidor, como funciones de validación o manejo de datos.
+
+### ¿Se te ocurre alguna ventaja para los desarrolladores?
+Algunas ventajas son:  
+- Menos aprendizaje de lenguajes diferentes, todo en JS.  
+- Posibilidad de compartir código entre cliente y servidor.  
+- Facilita la comunicación en tiempo real y el manejo de datos entre cliente y servidor sin complicaciones.
+
+> En HTTP tradicional, la comunicación es como enviar correos electrónicos: el cliente pide algo, espera, y el servidor responde. Funciona bien para páginas web, pero **no es eficiente para comunicación instantánea**.  
+> 
+> Los **WebSockets** permiten abrir una conexión directa y permanente entre el cliente y el servidor, de manera que ambos puedan enviarse mensajes al instante sin repetir peticiones HTTP.  
+> 
+> **Socket.IO** es una librería que facilita usar WebSockets y asegura que funcione incluso si no están disponibles, ofreciendo funciones como:
+> - `socket.on('nombreDelMensaje', funcionReceptora)` → escuchar mensajes  
+> - `socket.emit('nombreDelMensaje', datosAEnviar)` → enviar mensajes
+
+### Resume con tus propias palabras la diferencia fundamental entre una comunicación HTTP tradicional y una comunicación usando WebSockets/Socket.IO
+La diferencia principal es que HTTP es puntual, cada mensaje requiere una petición y respuesta separada, mientras que WebSockets/Socket.IO permiten una conexión permanente y bidireccional, donde cliente y servidor pueden enviarse mensajes instantáneamente sin esperar nuevas peticiones.
+
+### ¿En qué tipo de aplicaciones has visto o podrías imaginar que se usa esta comunicación en tiempo real?
+Se usa en aplicaciones como:  
+- Chats y mensajería instantánea  
+- Juegos en línea donde ves la posición de otros jugadores en tiempo real  
+- Colaboración en documentos compartidos (como Google Docs)  
 
 ## Actividad 03:
 
@@ -250,3 +331,4 @@ Inicialmente me voy a dedicar a hacer los diseños simples de la princesa y el s
 ```
 wa
 ```
+
