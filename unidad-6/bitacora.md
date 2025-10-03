@@ -836,11 +836,13 @@ El valor de port funciona como la dirección concreta donde el servidor está di
 
 #### Refresca la página page2.html. Observa la consola del navegador. ¿Ves algún error relacionado con la conexión? ¿Qué indica?
 
-w
+<img width="444" height="156" alt="image" src="https://github.com/user-attachments/assets/79772f96-0f2d-4bf8-99f6-d01ca5dd49f0" />
+No puede conectarse al servidor Socket.IO en localhost:3000. Básicamente, cuando el navegador intenta abrir la conexión con Socket.IO, no hay un servidor escuchando en ese puerto, así que recibe un ERR_CONNECTION_REFUSED.
 
 #### Vuelve a iniciar el servidor y refresca la página. ¿Desaparecen los errores?
 
-d
+<img width="455" height="228" alt="image" src="https://github.com/user-attachments/assets/957786a9-0b48-4dba-8df6-d5a6b58dc531" />
+Si, desaparecen.
 
 ---
 ### Experimento 02:
@@ -851,7 +853,9 @@ d
 
 #### ¿Qué pasó? ¿Por qué?
 
-d
+<img width="1856" height="999" alt="image" src="https://github.com/user-attachments/assets/65d3d943-a108-4bc0-8e35-087b460b3663" />
+Se queda sincronizando y no pasa nada.
+page1 y page2 se conectan, pero el servidor no tiene datos de la otra ventana todavía, porque le comentamos la linea, entonces hasRemotedata se queda en false y por eso no detecta como los cambios y la conexion.
 
 ---
 ### Experimento 03: 
@@ -861,11 +865,18 @@ d
 
 #### Mueve la ventana de page1. Observa la consola del navegador de page2. ¿Qué datos muestra?
 
-w
+<img width="438" height="217" alt="image" src="https://github.com/user-attachments/assets/492189d2-a2d9-4667-8824-15127ddb702f" />
+Cuando moví page1, en la consola de page2 vi que los datos remotos (remotePageData) se actualizaban con la nueva posición de page1. Eso tiene sentido porque page2 está escuchando los cambios que envía page1.
 
 #### Mueve la ventana de page2. Observa la consola de page1. ¿Qué pasa? ¿Por qué?
 
-d
+<img width="426" height="214" alt="image" src="https://github.com/user-attachments/assets/40574bcf-a4ff-4ee9-b04e-10a0ba6e3919" />
+Cuando moví page2, en la consola de page1 pasó lo mismo: page1 recibió los datos actualizados de page2. Esto pasa porque cada página solo envía su posición cuando detecta movimiento propio, y la otra página la recibe como remotePageData. cada página se actualiza con la posición de la otra,enviando información cuando se mueve.
+
+
+Mover page1 actualiza remotePageData en page2.
+Mover page2 actualiza remotePageData en page1.
+
 
 ---
 ### Experimento 04:
@@ -875,7 +886,26 @@ d
 
 #### ¿Qué puedes concluir y por qué?
 
-d
+Probé agregando un console.log("checkWindowPosition ejecutado") dentro del if:
+```js
+if (currentPageData.x !== previousPageData.x || currentPageData.y !== previousPageData.y || 
+    currentPageData.width !== previousPageData.width || currentPageData.height !== previousPageData.height) {
+
+    console.log("checkWindowPosition ejecutado"); // <--- agregado para prueba
+    point2 = [currentPageData.width / 2, currentPageData.height / 2]
+    socket.emit('win2update', currentPageData, socket.id);
+    previousPageData = currentPageData; 
+}
+```
+
+Cuando moví page2, la consola mostró el mensaje, lo que confirma que el if se ejecuta solo cuando detecta un cambio en la posición o tamaño de la ventana.
+<img width="1296" height="567" alt="image" src="https://github.com/user-attachments/assets/5f26e355-1892-4fe1-8751-8eb24fd45490" />
+<img width="588" height="468" alt="image" src="https://github.com/user-attachments/assets/21d622cd-6cec-4afc-8215-7846597e818a" />
+
+Cuando moví page1, page2 no mostró el mensaje en su consola, porque este if solo revisa los cambios de la ventana local, no los datos remotos. Esto explica por qué cada ventana envía actualizaciones solo de sí misma y no de la otra página automáticamente.
+<img width="1304" height="572" alt="image" src="https://github.com/user-attachments/assets/6ba8239a-cea7-4ea3-bc89-cd7996626da0" />
+
+En conclusión, esto significa que checkWindowPosition() funciona como un detector local de cambios: solo se activa cuando la ventana en la que se ejecuta realmente cambia de posición o tamaño. Por eso, cualquier actualización del otro usuario no dispara este if.
 
 ---
 ### Experimento 05:
@@ -884,9 +914,79 @@ d
 
 #### Cambia el background(220) para que dependa de la distancia entre las ventanas. Puedes calcular la magnitud del resultingVector usando let distancia = resultingVector.mag(); y luego usa map() para convertir esa distancia a un valor de gris o color. background(map(distancia, 0, 1000, 255, 0)); (ajusta el rango 0-1000 según sea necesario).
 
-wa
+Primero, dentro de draw(), calculé el vector relativo entre mi ventana y la remota:
+
+```js
+let vector1 = createVector(currentPageData.x, currentPageData.y);
+let vector2 = createVector(remotePageData.x, remotePageData.y);
+let resultingVector = createVector(vector2.x - vector1.x, vector2.y - vector1.y);
+```
+
+Luego obtuve la distancia entre las ventanas usando la magnitud del vector:
+
+```js
+let distancia = resultingVector.mag();
+```
+
+Después usé map() para convertir esa distancia a un gris y lo puse como fondo:
+
+```js
+let gris = map(distancia, 0, 1000, 255, 0); // 0 = ventanas juntas, 255 = muy separadas
+background(gris);
+```
+
+Con esto, el color de fondo cambia dependiendo de qué tan lejos esté la otra ventana.
+
+<img width="1508" height="682" alt="image" src="https://github.com/user-attachments/assets/e5ba5db2-dfc6-4e2f-89ac-0016b39e0252" />
+
+<img width="1237" height="570" alt="image" src="https://github.com/user-attachments/assets/db61a5ff-b6bb-45c2-bd26-b7c73091fc32" />
+
+<img width="825" height="530" alt="image" src="https://github.com/user-attachments/assets/37f7d6a4-d738-4f35-ad40-a2b5bc58d39b" />
 
 #### Inventa otra:
+
+Cuando la ventana de page2 se acerca a la posición de la ventana remota, el círculo se agranda y se vuelve más rojo intenso.
+Cuando se aleja, el círculo se hace más pequeño y menos saturado
+
+Calcular la distancia entre ventanas
+Aprovechamos el resultingVector que ya tenemos y calculamos su magnitud:
+```js
+let distancia = resultingVector.mag();
+```
+
+Mapear la distancia a tamaño y color
+
+```js
+let sizeCircle = map(distancia, 0, 1000, 250, 80);
+```
+```js
+let circleColor = color(map(distancia, 0, 1000, 255, 100), 0, 0);
+```
+
+Actualizar drawCircle
+```js
+function drawCircle(x, y, c, s) {
+    fill(c);
+    noStroke();
+    ellipse(x, y, s, s);
+}
+```
+No funciono jiji, preguntandole a chatgpt:
+El error [object Arguments] is not a valid color representation viene de que color() no puede recibir un valor undefined o un arreglo.
+
+basicamente se arregla asegurandose que siempre este en rango y que no sea nulo o algo raro
+```
+let distancia = resultingVector.mag();
+distancia = constrain(distancia, 0, 1000); // evitar valores fuera de rango
+let sizeCircle = map(distancia, 0, 1000, 250, 80);
+let circleColor = color(map(distancia, 0, 1000, 255, 100), 0, 0);
+
+```
+
+<img width="1656" height="784" alt="image" src="https://github.com/user-attachments/assets/de48efff-cd2a-47c4-b054-e08b29c91303" />
+<img width="1273" height="674" alt="image" src="https://github.com/user-attachments/assets/54c4c8cf-cc06-41f4-8a64-53593c11051f" />
+<img width="1007" height="571" alt="image" src="https://github.com/user-attachments/assets/dac51d48-4f80-4833-89b3-3da769e6a8fe" />
+
 
 ## Actividad 05:
 
@@ -913,6 +1013,9 @@ Quizá agregué más cositas si puedo, como distintos dibujos en distintos momen
 
 #### Bocetos:
 
+<img width="862" height="679" alt="image" src="https://github.com/user-attachments/assets/5de378bc-61f1-4aff-9938-3fa415a51f20" />
+
+<img width="680" height="679" alt="image" src="https://github.com/user-attachments/assets/2331daf4-3f3c-4dc4-a083-969a6ae01f2c" />
 
 
 ### Implementa tu idea.
@@ -2113,4 +2216,5 @@ function windowResized() {
 <img width="223" height="251" alt="image" src="https://github.com/user-attachments/assets/5d8d1b3b-9a21-4ddb-83d0-b7286ecaec0c" />
 
 <img width="1045" height="597" alt="image" src="https://github.com/user-attachments/assets/20442c1e-352d-4144-8cbf-c2ad9adcd34c" />
+
 
