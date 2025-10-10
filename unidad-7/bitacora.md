@@ -13,7 +13,9 @@ Ya que el computador y el celular pueden no estar conectados a la misma red loca
 
 ## Describe brevemente qué hace npm install y npm start.
 
-
+`npm` significa node package manager:
+- `npm install`:
+- `npm start`: 
 
 ## ¿Qué mensajes observaste en la terminal del servidor al conectar el cliente de escritorio y el cliente móvil? ¿Eran diferentes los mensajes o identificadores?
 
@@ -38,5 +40,6 @@ io.on('connection', (socket) => {
 ## Solo se registra que un cliente se conectó sin importar cual, es decir, solo busca como tal el evento de conexión.
 
 Describe el comportamiento observado: ¿Funcionó la interacción? ¿Hubo algún retraso (latencia)?
+
 
 
