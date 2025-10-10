@@ -7,7 +7,8 @@
 
 ## ¿Qué URL de Dev Tunnels obtuviste? ¿Por qué crees que necesitamos usar esta URL en lugar de http://localhost:3000 o la IP local de tu computador para que el celular se conecte?
 
-https://5t0fc03h-3000.use2.devtunnels.ms/
+### https://5t0fc03h-3000.use2.devtunnels.ms/
+
 Ya que el computador y el celular pueden no estar conectados a la misma red local. Cuando estas hosteando localmente solo es para ese mismo computador, más no es un link que funcionaría en todos los demás.
 
 ## Describe brevemente qué hace npm install y npm start.
@@ -37,4 +38,5 @@ io.on('connection', (socket) => {
 ## Solo se registra que un cliente se conectó sin importar cual, es decir, solo busca como tal el evento de conexión.
 
 Describe el comportamiento observado: ¿Funcionó la interacción? ¿Hubo algún retraso (latencia)?
+
 
