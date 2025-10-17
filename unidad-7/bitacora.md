@@ -1,6 +1,15 @@
 
 # Evidencias de la unidad 7
 
+# Índice de Actividades
+
+1. [Actividad 01](#actividad-01)
+2. [Actividad 02](#actividad-02)
+3. [Actividad 03](#actividad-03)
+4. [Actividad 04](#actividad-04)
+5. [Actividad 05](#actividad-05)
+6. [Autoevaluación](#autoevaluación)
+
 
 
 ## Actividad 01:
@@ -64,6 +73,9 @@ Usar la IP local es más sencillo y rápido si todos los dispositivos están en 
 
 <img width="315" height="457" alt="image" src="https://github.com/user-attachments/assets/8acac7c2-acbb-4d1e-b6b9-878dc5bc65b8" />
 <img width="383" height="134" alt="image" src="https://github.com/user-attachments/assets/a5043489-667b-4033-a3e7-a8187b8f5243" />
+<img width="398" height="329" alt="image" src="https://github.com/user-attachments/assets/837916e2-eb4a-406d-8c80-980d782946bf" />
+<img width="398" height="900" alt="image" src="https://github.com/user-attachments/assets/33416339-0f94-479f-83d0-ea8aac9ac591" />
+
 
 ## Actividad 03:
 
@@ -72,8 +84,6 @@ Usar la IP local es más sencillo y rápido si todos los dispositivos están en 
 Básicamente `express.static('public')` sirve para que todos los archivos que estén en la carpeta `public` se puedan usar directamente desde el navegador, como HTML, CSS, JS, imágenes, todo eso. Entonces, no tienes que estar creando una ruta específica para cada archivo.  
 
 En cambio, `app.get('/ruta', …)` es más manual, porque tienes que decir exactamente qué ruta sirve qué cosa. Es más flexible si quieres respuestas dinámicas, pero para archivos estáticos pues `express.static` es mucho más práctico y rápido.
-
----
 
 ### Explica detalladamente el flujo de un mensaje táctil:
 
@@ -633,3 +643,13 @@ server.listen(port, () => {
     console.log(`Server is listening on http://localhost:${port}`);
 });
 ```
+
+## Autoevaluación:
+
+| Actividad | Estado    | Justificación |
+|-----------|----------|---------------|
+| Actividad 01 | Completo | Leí los recursos sobre los dev tunnels para entender su funcionamiento de forma más clara, aprendí varios detalles nuevos, realicé la práctica y logré acceder a la aplicación desde mi celular, revisando los mensajes de la consola y comprobando que todo funcionara. Además respondí todas las preguntas, reflexionando sobre cada paso. |
+| Actividad 02 | Completo | Respondí todas las preguntas, reflexioné sobre la importancia de los dev tunnels, analizando sus ventajas y comparándolos con los IPS. También completé la actividad práctica y presenté las capturas de evidencia correspondientes. |
+| Actividad 03 | Completo | Respondí todas las preguntas, analicé detalladamente el flujo del programa y las funciones del servidor, entendiendo cómo se conectan los distintos componentes y cómo se manejan los datos. |
+| Actividad 04 | Completo | Realicé y revisé el diagrama siguiendo las indicaciones del código, pude ver claramente las interacciones entre los distintos actores en los diferentes momentos del programa y además expliqué brevemente el diagrama para reforzar mi comprensión. |
+| Actividad 05 | Completo | Creé un visualizador interactivo usando touch y apoyándome en IA generativa para una canción, diseñando la idea, los dibujos y los momentos clave a implementar. Lo probé en p5.js y finalmente verifiqué que todo funcionara correctamente, asegurándome de que la experiencia fuera coherente y completa. |
